@@ -10,7 +10,7 @@
 #  EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO ANY WARRANTY
 #  THAT THE SOFTWARE WILL CONFORM TO SPECIFICATIONS OR BE ERROR-FREE AND ANY
 #  IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
-#  TITLE, OR NON-INFRINGEMENT.  IN NO EVENT SHALL ETH ZURICH BE LIABLE FOR ANY     
+#  TITLE, OR NON-INFRINGEMENT.  IN NO EVENT SHALL ETH ZURICH BE LIABLE FOR ANY
 #  DAMAGES, INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT,
 #  SPECIAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF, RESULTING FROM, OR IN
 #  ANY WAY CONNECTED WITH THIS SOFTWARE (WHETHER OR NOT BASED UPON WARRANTY,
@@ -24,7 +24,7 @@ include ../Makefile.config
 
 LIBDIR = $(ELINA_PREFIX)/lib
 
-INCLDIR = $(ELINA_PREFIX)/include 
+INCLDIR = $(ELINA_PREFIX)/include
 
 INSTALL = install
 INSTALLd = install -d
@@ -44,9 +44,9 @@ INSTALLd = install -d
 
 SOINST = libfppoly.so
 
-FPPOLYH = fppoly.h 
+FPPOLYH = fppoly.h
 
-all : libfppoly.so 
+all : libfppoly.so fppoly_test_mine
 
 libfppoly.so : $(OBJS) $(FPPOLYH)
 	$(CC) -shared $(CC_ELINA_DYLIB) $(CFLAGS) $(DFLAGS) $(INCLUDES) -o $(SOINST) $(OBJS) $(LIBS)
@@ -85,6 +85,9 @@ lstm_approx.o : lstm_approx.h lstm_approx.c
 affine_transform.o : affine_transform.h affine_transform.c
 	$(CC) -c $(CFLAGS) $(DFLAGS) $(INCLUDES) -o affine_transform.o affine_transform.c $(LIBS)
 
+fppoly_test_mine : fppoly_test_mine.c libfppoly.so
+	$(CC) $(CFLAGS) $(DFLAGS) $(INCLUDES) -o fppoly_test_mine fppoly_test_mine.c $(LIBS) -L. -lfppoly
+
 install:
 	$(INSTALLd) $(LIBDIR); \
 	for i in $(SOINST); do \
@@ -94,10 +97,9 @@ install:
 	$(INSTALLd) $(INCLDIR); \
 	for i in $(FPPOLYH); do \
 		$(INSTALL) $$i $(INCLDIR); \
-	done; 
+	done;
 
 
 clean:
 	-rm *.o
 	-rm *.so
-
