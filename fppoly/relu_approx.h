@@ -29,6 +29,12 @@ extern "C" {
 
 #include "backsubstitute.h"
 
+#if HAS_RNN
+expr_t * lexpr_replace_relu_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool use_area_heuristic);
+
+expr_t * uexpr_replace_relu_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool use_area_heuristic);
+#endif
+
 expr_t * lexpr_replace_relu_bounds(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, bool use_area_heuristic);
 
 expr_t * uexpr_replace_relu_bounds(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, bool use_area_heuristic);

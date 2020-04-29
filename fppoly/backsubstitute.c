@@ -6,13 +6,19 @@ void update_state_using_predecessor_layer(fppoly_internal_t *pr,fppoly_t *fp, ex
 	expr_t *uexpr = *uexpr_ptr;
 	expr_t *tmp_l = lexpr;
 	expr_t *tmp_u = uexpr;
-        neuron_t ** aux_neurons = fp->layers[k]->neurons; 
+	neuron_t ** aux_neurons = fp->layers[k]->neurons;
 	if(fp->layers[k]->type==FFN || fp->layers[k]->type==CONV){      
 		if(fp->layers[k]->activation==RELU){
-				
-		       lexpr = lexpr_replace_relu_bounds(pr,lexpr,aux_neurons, use_area_heuristic);
-		            
-		       uexpr = uexpr_replace_relu_bounds(pr,uexpr,aux_neurons, use_area_heuristic);
+
+#if HAS_RNN
+			lexpr = lexpr_replace_relu_bounds_(pr, lexpr, aux_neurons, fp->layers[k]->dims, use_area_heuristic);
+
+			uexpr = uexpr_replace_relu_bounds_(pr,uexpr,aux_neurons, fp->layers[k]->dims, use_area_heuristic);
+#else
+            lexpr = lexpr_replace_relu_bounds(pr,lexpr,aux_neurons, use_area_heuristic);
+
+            uexpr = uexpr_replace_relu_bounds(pr,uexpr,aux_neurons, use_area_heuristic);
+#endif
 		}
 		else if(fp->layers[k]->activation==SIGMOID){
 		                
@@ -258,7 +264,7 @@ void * update_state_using_previous_layers(void *args){
 
 void update_state_using_previous_layers_parallel(elina_manager_t *man, fppoly_t *fp, size_t layerno, bool use_area_heuristic){
 	//size_t NUM_THREADS = get_nprocs();
-  size_t NUM_THREADS = sysconf(_SC_NPROCESSORS_ONLN);
+  size_t NUM_THREADS =  sysconf(_SC_NPROCESSORS_ONLN);
 	nn_thread_t args[NUM_THREADS];
 	pthread_t threads[NUM_THREADS];
 	size_t num_out_neurons = fp->layers[layerno]->dims;

@@ -43,7 +43,8 @@ extern "C" {
 #include "elina_generic.h"
 #include "elina_box_meetjoin.h"
 
-
+// sunbing: add vanilla RNN support
+#define HAS_RNN	1
 
 typedef struct fppoly_internal_t{
   /* Name of function */
@@ -82,9 +83,12 @@ typedef enum activation_type_t{
     
 typedef enum fnn_op{
 	MATMULT,
-        SUB1,
+	SUB1,
 	SUB2,
-        MUL,
+	MUL,
+#if HAS_RNN
+	MATMUL_RNN,
+#endif
 }fnn_op;
 
 
@@ -166,6 +170,10 @@ elina_abstract0_t* fppoly_from_network_input_poly(elina_manager_t *man, size_t i
 
 fppoly_internal_t* fppoly_init_from_manager(elina_manager_t* man, elina_funid_t funid);
 
+#if HAS_RNN
+void ffn_handle_first_relu_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim, size_t size, size_t num_pixels, size_t *predecessors);
+#endif
+
 void ffn_handle_first_relu_layer(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias,  size_t size, size_t num_pixels, size_t *predecessors);
 
 void ffn_handle_first_sigmoid_layer(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias,  size_t size, size_t num_pixels, size_t *predecessors);
@@ -191,6 +199,10 @@ void ffn_handle_first_parabola_layer_no_alloc(elina_manager_t* man, elina_abstra
 void ffn_handle_first_log_layer_no_alloc(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias,  size_t size, size_t num_pixels, size_t *predecessors);
 
 void ffn_handle_intermediate_affine_layer(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic);
+
+#if HAS_RNN
+void ffn_handle_intermediate_relu_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic);
+#endif
 
 void ffn_handle_intermediate_relu_layer(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic);
     

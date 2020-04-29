@@ -168,7 +168,7 @@ double compute_lb_from_expr(fppoly_internal_t *pr, expr_t * expr, fppoly_t * fp,
 	if(expr->inf_coeff==NULL || expr->sup_coeff==NULL){
 		return res_inf;
 	}
-	for(i=0; i < dims; i++){
+	for(i=0; i < dims; i++){    //dim is how many terms in expression
 		//if(expr->inf_coeff[i]<0){
 		if(expr->type==DENSE){
 			k = i;

@@ -1,15 +1,226 @@
 #include "relu_approx.h"
 
+#if HAS_RNN
+expr_t * lexpr_replace_relu_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool use_area_heuristic){
+    size_t num_neurons = expr->size;
+    size_t i,k;
+    expr_t * res = alloc_expr();
+    res->inf_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->sup_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->inf_cst = expr->inf_cst;
+    res->sup_cst = expr->sup_cst;
+    res->type = expr->type;
+    res->size = num_neurons;
+
+    for(i = 0; i < num_neurons; i++){
+        if(expr->type==DENSE){
+            k = i;
+        }
+        else{
+            k = expr->dim[i];
+        }
+
+        if (expr->type == SPARSE) {
+            if ((k + 1) > aux_neuron_len) {
+                res->inf_coeff[i] = expr->inf_coeff[i];
+                res->sup_coeff[i] = expr->sup_coeff[i];
+                continue;
+            }
+        }
+
+        neuron_t *neuron_k = neurons[k];
+        double lb = neurons[k]->lb;
+        double ub = neurons[k]->ub;
+        double width = ub + lb;
+        double lambda_inf = -ub/width;
+        double lambda_sup = ub/width;
+
+        if((expr->sup_coeff[i]==0) && (expr->inf_coeff[i]==0)){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            continue;
+        }
+        else if(neuron_k->ub<=0){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            continue;
+        }
+        else if(neuron_k->lb<0){
+            res->inf_coeff[i] = expr->inf_coeff[i];
+            res->sup_coeff[i] = expr->sup_coeff[i];
+        }
+        else if(expr->sup_coeff[i]<0){
+
+            double mu_inf = lambda_inf*neurons[k]->lb;
+            double mu_sup = lambda_sup*neurons[k]->lb;
+            //res->coeff[i] = lambda*expr->coeff[i];
+            //res->cst = res->cst + expr->coeff[i]*mu;
+            elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],lambda_inf,lambda_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            double tmp1, tmp2;
+            elina_double_interval_mul_cst_coeff(pr,&tmp1,&tmp2,mu_inf,mu_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            res->inf_cst = res->inf_cst + tmp1 + pr->min_denormal;
+            res->sup_cst = res->sup_cst + tmp2 + pr->min_denormal;
+        }
+        else if (expr->inf_coeff[i]<0){
+
+            double area1 = lb*ub;
+            double area2 = 0.5*ub*width;
+            double area3 = 0.5*lb*width;
+            //if((area1 < area2) && (area1 < area3)){
+            //if(1){
+            //res->coeff[i] = lambda*expr->coeff[i];
+            //	elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],lambda_inf,lambda_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+
+            //}
+            if(use_area_heuristic){
+                if((area2 < area1) && (area2 < area3)){
+                    res->inf_coeff[i] = 0.0;
+                    res->sup_coeff[i] = 0.0;
+                }
+                else{
+                    res->inf_coeff[i] = expr->inf_coeff[i];
+                    res->sup_coeff[i] = expr->sup_coeff[i];
+                }
+            }
+            else{
+                res->inf_coeff[i] = 0.0;
+                res->sup_coeff[i] = 0.0;
+            }
+        }
+        else{
+
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            double tmp1, tmp2;
+            elina_double_interval_mul(&tmp1,&tmp2,expr->inf_coeff[i],expr->sup_coeff[i],0,ub);
+            res->inf_cst = res->inf_cst + tmp1;
+            res->sup_cst = res->sup_cst + tmp2;
+        }
+    }
+    if(expr->type==SPARSE){
+        res->dim = (size_t*)malloc(num_neurons*sizeof(size_t));
+        for(i=0; i < num_neurons; i++){
+            res->dim[i] = expr->dim[i];
+        }
+    }
+    return res;
+}
+
+expr_t * uexpr_replace_relu_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool use_area_heuristic){
+    size_t num_neurons = expr->size;
+    size_t i, k;
+    expr_t * res = alloc_expr();
+    res->inf_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->sup_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->inf_cst = expr->inf_cst;
+    res->sup_cst = expr->sup_cst;
+    res->type = expr->type;
+    res->size = num_neurons;
+    for(i = 0; i < num_neurons; i++){
+        if(expr->type==DENSE){
+            k = i;
+        }
+        else{
+            k = expr->dim[i];
+        }
+
+        if (expr->type == SPARSE) {
+            if ((k + 1) > aux_neuron_len) {
+                res->inf_coeff[i] = expr->inf_coeff[i];
+                res->sup_coeff[i] = expr->sup_coeff[i];
+                continue;
+            }
+        }
+
+        neuron_t *neuron_k = neurons[k];
+        double lb = neurons[k]->lb;
+        double ub = neurons[k]->ub;
+        double width = ub + lb;
+        double lambda_inf = -ub/width;
+        double lambda_sup = ub/width;
+        if((expr->sup_coeff[i]==0) && (expr->inf_coeff[i]==0)){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            continue;
+        }
+        else if(neuron_k->ub<=0){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            continue;
+        }
+        else if(neuron_k->lb<0){
+            res->inf_coeff[i] = expr->inf_coeff[i];
+            res->sup_coeff[i] = expr->sup_coeff[i];
+        }
+        else if(expr->inf_coeff[i]<0){
+
+            double mu_inf = lambda_inf*neurons[k]->lb;
+            double mu_sup = lambda_sup*neurons[k]->lb;
+            //res->coeff[i] = lambda*expr->coeff[i];
+            //res->cst = res->cst + expr->coeff[i]*mu;
+            elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],lambda_inf,lambda_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            double tmp1, tmp2;
+            elina_double_interval_mul_cst_coeff(pr,&tmp1,&tmp2,mu_inf,mu_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            res->inf_cst = res->inf_cst + tmp1 + pr->min_denormal;
+            res->sup_cst = res->sup_cst + tmp2 + pr->min_denormal;
+        }
+        else if(expr->sup_coeff[i]<0){
+
+            double area1 = lb*ub;
+            double area2 = 0.5*ub*width;
+            double area3 = 0.5*lb*width;
+            //if((area1 < area2) && (area1 < area3)){
+            //if(1){
+            //res->coeff[i] = lambda*expr->coeff[i];
+            //	elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],lambda_inf,lambda_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            //}
+            if(use_area_heuristic){
+                if((area2 < area1) && (area2 < area3)){
+                    res->inf_coeff[i] = 0.0;
+                    res->sup_coeff[i] = 0.0;
+                }
+                else{
+                    res->inf_coeff[i] = expr->inf_coeff[i];
+                    res->sup_coeff[i] = expr->sup_coeff[i];
+                }
+            }
+            else{
+                res->inf_coeff[i] = 0.0;
+                res->sup_coeff[i] = 0.0;
+            }
+            //
+        }
+        else{
+
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            double tmp1, tmp2;
+            elina_double_interval_mul(&tmp1,&tmp2,expr->inf_coeff[i],expr->sup_coeff[i],0,ub);
+            res->inf_cst = res->inf_cst + tmp1;
+            res->sup_cst = res->sup_cst + tmp2;
+        }
+
+    }
+    if(expr->type==SPARSE){
+        res->dim = (size_t*)malloc(num_neurons*sizeof(size_t));
+        for(i=0; i < num_neurons; i++){
+            res->dim[i] = expr->dim[i];
+        }
+    }
+    return res;
+}
+#endif  /* HAS_RNN */
+
 expr_t * lexpr_replace_relu_bounds(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, bool use_area_heuristic){
 	size_t num_neurons = expr->size;
 	size_t i,k;
-	expr_t * res = alloc_expr();  
+	expr_t * res = alloc_expr();
 	res->inf_coeff = (double *)malloc(num_neurons*sizeof(double));
 	res->sup_coeff = (double *)malloc(num_neurons*sizeof(double));
 	res->inf_cst = expr->inf_cst;
 	res->sup_cst = expr->sup_cst;
 	res->type = expr->type;
-	res->size = num_neurons;  
+	res->size = num_neurons;
 
 	for(i = 0; i < num_neurons; i++){
 		if(expr->type==DENSE){
@@ -18,12 +229,14 @@ expr_t * lexpr_replace_relu_bounds(fppoly_internal_t * pr, expr_t * expr, neuron
 		else{
 			k = expr->dim[i];
 		}
+
 		neuron_t *neuron_k = neurons[k];
 		double lb = neurons[k]->lb;
 		double ub = neurons[k]->ub;
 		double width = ub + lb;
 		double lambda_inf = -ub/width;
 		double lambda_sup = ub/width;
+
 		if((expr->sup_coeff[i]==0) && (expr->inf_coeff[i]==0)){
 			res->inf_coeff[i] = 0.0;
 			res->sup_coeff[i] = 0.0;
