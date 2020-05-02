@@ -10,7 +10,7 @@
 #  EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO ANY WARRANTY
 #  THAT THE SOFTWARE WILL CONFORM TO SPECIFICATIONS OR BE ERROR-FREE AND ANY
 #  IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
-#  TITLE, OR NON-INFRINGEMENT.  IN NO EVENT SHALL ETH ZURICH BE LIABLE FOR ANY     
+#  TITLE, OR NON-INFRINGEMENT.  IN NO EVENT SHALL ETH ZURICH BE LIABLE FOR ANY
 #  DAMAGES, INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT,
 #  SPECIAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF, RESULTING FROM, OR IN
 #  ANY WAY CONNECTED WITH THIS SOFTWARE (WHETHER OR NOT BASED UPON WARRANTY,
@@ -24,11 +24,13 @@ from elina_manager_h import *
 from elina_abstract0_h import *
 from elina_interval_h import *
 from elina_linexpr0_h import *
-import numpy as np 
+import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
 
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
+
+
 # ====================================================================== #
 # Basics
 # ====================================================================== #
@@ -55,10 +57,11 @@ def fppoly_manager_alloc():
 
     return man
 
+
 def fppoly_from_network_input(man, intdim, realdim, inf_array, sup_array):
     """
     Create an abstract element from perturbed input
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -71,7 +74,7 @@ def fppoly_from_network_input(man, intdim, realdim, inf_array, sup_array):
         lower bound array
     sup_array: POINTER(double)
         upper bound array
-    
+
     Returns
     -------
     res: ElinaAbstract0Ptr
@@ -83,18 +86,20 @@ def fppoly_from_network_input(man, intdim, realdim, inf_array, sup_array):
     try:
         fppoly_from_network_input_c = fppoly_api.fppoly_from_network_input
         fppoly_from_network_input_c.restype = ElinaAbstract0Ptr
-        fppoly_from_network_input_c.argtypes = [ElinaManagerPtr, c_size_t, c_size_t,ndpointer(ctypes.c_double),ndpointer(ctypes.c_double)]
-        res = fppoly_from_network_input_c(man,intdim, realdim, inf_array,sup_array)
+        fppoly_from_network_input_c.argtypes = [ElinaManagerPtr, c_size_t, c_size_t, ndpointer(ctypes.c_double),
+                                                ndpointer(ctypes.c_double)]
+        res = fppoly_from_network_input_c(man, intdim, realdim, inf_array, sup_array)
     except Exception as inst:
         print('Problem with loading/calling "fppoly_from_network_input" from "libfppoly.so"')
-        print(inst)	
+        print(inst)
 
     return res
+
 
 def fppoly_set_network_input_box(man, element, intdim, realdim, inf_array, sup_array):
     """
         Create an abstract element from perturbed input
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -109,30 +114,33 @@ def fppoly_set_network_input_box(man, element, intdim, realdim, inf_array, sup_a
         lower bound array
         sup_array: POINTER(double)
         upper bound array
-        
+
         Returns
         -------
         res: ElinaAbstract0Ptr
         Pointer to the new abstract object
-        
+
         """
-    
+
     res = None
     try:
         fppoly_set_network_input_box_c = fppoly_api.fppoly_set_network_input_box
         fppoly_set_network_input_box_c.restype = None
-        fppoly_set_network_input_box_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t,ndpointer(ctypes.c_double),ndpointer(ctypes.c_double)]
-        res = fppoly_set_network_input_box_c(man,element, intdim, realdim, inf_array,sup_array)
+        fppoly_set_network_input_box_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t,
+                                                   ndpointer(ctypes.c_double), ndpointer(ctypes.c_double)]
+        res = fppoly_set_network_input_box_c(man, element, intdim, realdim, inf_array, sup_array)
     except Exception as inst:
         print('Problem with loading/calling "fppoly_set_network_input_box" from "libfppoly.so"')
         print(inst)
 
     return res
 
-def fppoly_from_network_input_poly(man, intdim, realdim, inf_array, sup_array, lexpr_weights, lexpr_cst, lexpr_dim,  uexpr_weights, uexpr_cst, uexpr_dim, expr_size):
+
+def fppoly_from_network_input_poly(man, intdim, realdim, inf_array, sup_array, lexpr_weights, lexpr_cst, lexpr_dim,
+                                   uexpr_weights, uexpr_cst, uexpr_dim, expr_size):
     """
     Create an abstract element from perturbed input
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -170,22 +178,67 @@ def fppoly_from_network_input_poly(man, intdim, realdim, inf_array, sup_array, l
     try:
         fppoly_from_network_input_poly_c = fppoly_api.fppoly_from_network_input_poly
         fppoly_from_network_input_poly_c.restype = ElinaAbstract0Ptr
-        fppoly_from_network_input_poly_c.argtypes = [ElinaManagerPtr, c_size_t, c_size_t,ndpointer(ctypes.c_double),ndpointer(ctypes.c_double),ndpointer(ctypes.c_double),ndpointer(ctypes.c_double),ndpointer(ctypes.c_size_t),ndpointer(ctypes.c_double),ndpointer(ctypes.c_double),ndpointer(ctypes.c_size_t), c_size_t]
-        res = fppoly_from_network_input_poly_c(man,intdim, realdim, inf_array,sup_array, lexpr_weights, lexpr_cst, lexpr_dim, uexpr_weights, uexpr_cst, uexpr_dim ,expr_size)
+        fppoly_from_network_input_poly_c.argtypes = [ElinaManagerPtr, c_size_t, c_size_t, ndpointer(ctypes.c_double),
+                                                     ndpointer(ctypes.c_double), ndpointer(ctypes.c_double),
+                                                     ndpointer(ctypes.c_double), ndpointer(ctypes.c_size_t),
+                                                     ndpointer(ctypes.c_double), ndpointer(ctypes.c_double),
+                                                     ndpointer(ctypes.c_size_t), c_size_t]
+        res = fppoly_from_network_input_poly_c(man, intdim, realdim, inf_array, sup_array, lexpr_weights, lexpr_cst,
+                                               lexpr_dim, uexpr_weights, uexpr_cst, uexpr_dim, expr_size)
     except Exception as inst:
         print('Problem with loading/calling "fppoly_from_network_input_poly" from "libfppoly.so"')
-        print(inst)	
+        print(inst)
 
     return res
 
 
+# sunbing
 
-
-
-def ffn_handle_first_relu_layer(man, element,weights, bias,  size, num_pixels, predecessors):
+def rnn_handle_first_relu_layer(man, element, weights, bias, dim, size, num_pixels, predecessors):
     """
     handle the first FFN ReLU layer
-    
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix.
+    bias : POINTER(c_double)
+        The bias vector
+    size: c_size_t
+	Number of neurons in the first layer
+    num_pixels:
+        Number of pixels in the input
+    predecessors:
+        the layers before the current layer
+    Returns
+    -------
+    res : ElinaAbstract0Ptr
+        Pointer to the new abstract object.
+
+    """
+
+    try:
+        ffn_handle_first_relu_layer_c = fppoly_api.ffn_handle_first_relu_layer_
+        ffn_handle_first_relu_layer_c.restype = None
+        ffn_handle_first_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                  ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t,
+                                                  POINTER(c_size_t)]
+        ffn_handle_first_relu_layer_c(man, element, weights, bias, dim, size, num_pixels, predecessors)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_first_relu_layer" from "libfppoly.so"')
+        print(inst)
+
+    return
+
+
+def ffn_handle_first_relu_layer(man, element, weights, bias, size, num_pixels, predecessors):
+    """
+    handle the first FFN ReLU layer
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -212,19 +265,20 @@ def ffn_handle_first_relu_layer(man, element,weights, bias,  size, num_pixels, p
     try:
         ffn_handle_first_relu_layer_c = fppoly_api.ffn_handle_first_relu_layer
         ffn_handle_first_relu_layer_c.restype = None
-        ffn_handle_first_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_relu_layer_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                  ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_relu_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_relu_layer" from "libfppoly.so"')
-        print(inst)	
+        print(inst)
 
     return
 
 
-def ffn_handle_first_relu_layer_no_alloc(man, element,weights, bias,  size, num_pixels, predecessors):
+def ffn_handle_first_relu_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the first FFN ReLU layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -245,24 +299,27 @@ def ffn_handle_first_relu_layer_no_alloc(man, element,weights, bias,  size, num_
         -------
         res : ElinaAbstract0Ptr
         Pointer to the new abstract object.
-        
+
         """
-    
+
     try:
         ffn_handle_first_relu_layer_no_alloc_c = fppoly_api.ffn_handle_first_relu_layer_no_alloc
         ffn_handle_first_relu_layer_no_alloc_c.restype = None
-        ffn_handle_first_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_relu_layer_no_alloc_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                           ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                           POINTER(c_size_t)]
+        ffn_handle_first_relu_layer_no_alloc_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_relu_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
     return
 
-def ffn_handle_first_sigmoid_layer(man, element,weights, bias,  size, num_pixels, predecessors):
+
+def ffn_handle_first_sigmoid_layer(man, element, weights, bias, size, num_pixels, predecessors):
     """
     handle the FFN first Sigmoid layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -283,23 +340,24 @@ def ffn_handle_first_sigmoid_layer(man, element,weights, bias,  size, num_pixels
         Pointer to the new abstract object.
 
     """
-    
+
     try:
         ffn_handle_first_sigmoid_layer_c = fppoly_api.ffn_handle_first_sigmoid_layer
         ffn_handle_first_sigmoid_layer_c.restype = None
-        ffn_handle_first_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_sigmoid_layer_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                     ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_sigmoid_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_sigmoid_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
 
 
-def ffn_handle_first_sigmoid_layer_no_alloc(man, element,weights, bias,  size, num_pixels, predecessors):
+def ffn_handle_first_sigmoid_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the FFN first Sigmoid layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -318,24 +376,27 @@ def ffn_handle_first_sigmoid_layer_no_alloc(man, element,weights, bias,  size, n
         -------
         res : ElinaAbstract0Ptr
         Pointer to the new abstract object.
-        
+
         """
-    
+
     try:
         ffn_handle_first_sigmoid_layer_no_alloc_c = fppoly_api.ffn_handle_first_sigmoid_layer_no_alloc
         ffn_handle_first_sigmoid_layer_no_alloc_c.restype = None
-        ffn_handle_first_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_sigmoid_layer_no_alloc_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                              ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                              POINTER(c_size_t)]
+        ffn_handle_first_sigmoid_layer_no_alloc_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_sigmoid_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
     return
 
-def ffn_handle_first_tanh_layer(man, element,weights, bias,  size, num_pixels, predecessors):
+
+def ffn_handle_first_tanh_layer(man, element, weights, bias, size, num_pixels, predecessors):
     """
     handle the first FFN Tanh layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -356,23 +417,24 @@ def ffn_handle_first_tanh_layer(man, element,weights, bias,  size, num_pixels, p
         Pointer to the new abstract object.
 
     """
-    
+
     try:
         ffn_handle_first_tanh_layer_c = fppoly_api.ffn_handle_first_tanh_layer
         ffn_handle_first_tanh_layer_c.restype = None
-        ffn_handle_first_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_tanh_layer_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                  ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_tanh_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_tanh_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
 
 
-def ffn_handle_first_tanh_layer_no_alloc(man, element,weights, bias,  size, num_pixels, predecessors):
+def ffn_handle_first_tanh_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the first FFN Tanh layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -391,14 +453,16 @@ def ffn_handle_first_tanh_layer_no_alloc(man, element,weights, bias,  size, num_
         -------
         res : ElinaAbstract0Ptr
         Pointer to the new abstract object.
-        
+
         """
-    
+
     try:
         ffn_handle_first_tanh_layer_no_alloc_c = fppoly_api.ffn_handle_first_tanh_layer_no_alloc
         ffn_handle_first_tanh_layer_no_alloc_c.restype = None
-        ffn_handle_first_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_tanh_layer_no_alloc_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                           ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                           POINTER(c_size_t)]
+        ffn_handle_first_tanh_layer_no_alloc_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_tanh_layer_no_alloc" from "libfppoly.so"')
         print(inst)
@@ -406,10 +470,10 @@ def ffn_handle_first_tanh_layer_no_alloc(man, element,weights, bias,  size, num_
     return
 
 
-def ffn_handle_first_parabola_layer(man, element,weights, bias,  size, num_pixels, predecessors):
+def ffn_handle_first_parabola_layer(man, element, weights, bias, size, num_pixels, predecessors):
     """
     handle the first FFN Parabolic layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -430,23 +494,24 @@ def ffn_handle_first_parabola_layer(man, element,weights, bias,  size, num_pixel
         Pointer to the new abstract object.
 
     """
-    
+
     try:
         ffn_handle_first_parabola_layer_c = fppoly_api.ffn_handle_first_parabola_layer
         ffn_handle_first_parabola_layer_c.restype = None
-        ffn_handle_first_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_parabola_layer_c(man,element,weights, bias, size, num_pixels, predecessors)
+        ffn_handle_first_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                      ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_parabola_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_parabola_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
 
 
-def ffn_handle_first_parabola_layer_no_alloc(man, element,weights, bias,  size, num_pixels, predecessors):
+def ffn_handle_first_parabola_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the first FFN Parabolic layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -463,24 +528,27 @@ def ffn_handle_first_parabola_layer_no_alloc(man, element,weights, bias,  size, 
         -------
         res : ElinaAbstract0Ptr
         Pointer to the new abstract object.
-        
+
         """
-    
+
     try:
         ffn_handle_first_parabola_layer_no_alloc_c = fppoly_api.ffn_handle_first_parabola_layer_no_alloc
         ffn_handle_first_parabola_layer_no_alloc_c.restype = None
-        ffn_handle_first_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_parabola_layer_no_alloc_c(man,element,weights, bias, size, num_pixels, predecessors)
+        ffn_handle_first_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                               ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                               POINTER(c_size_t)]
+        ffn_handle_first_parabola_layer_no_alloc_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_parabola_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
     return
 
-def ffn_handle_first_log_layer(man, element,weights, bias,  size, num_pixels, predecessors):
+
+def ffn_handle_first_log_layer(man, element, weights, bias, size, num_pixels, predecessors):
     """
     handle the first FFN log layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -501,22 +569,24 @@ def ffn_handle_first_log_layer(man, element,weights, bias,  size, num_pixels, pr
         Pointer to the new abstract object.
 
     """
-    
+
     try:
         ffn_handle_first_log_layer_c = fppoly_api.ffn_handle_first_log_layer
         ffn_handle_first_log_layer_c.restype = None
-        ffn_handle_first_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_log_layer_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_log_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_log_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
+
 
 def ffn_handle_first_sub_layer(man, element, cst, is_minuend, size, predecessors):
     """
     handle the first FFN log layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -534,22 +604,24 @@ def ffn_handle_first_sub_layer(man, element, cst, is_minuend, size, predecessors
     res : None
 
     """
-    
+
     try:
         ffn_handle_first_sub_layer_c = fppoly_api.ffn_handle_first_sub_layer
         ffn_handle_first_sub_layer_c.restype = None
-        ffn_handle_first_sub_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),  c_bool, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_sub_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), c_bool,
+                                                 c_size_t, POINTER(c_size_t)]
         ffn_handle_first_sub_layer_c(man, element, cst, is_minuend, size, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_sub_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
 
-def ffn_handle_first_mul_layer(man, element, cst,  size, predecessors):
+
+def ffn_handle_first_mul_layer(man, element, cst, size, predecessors):
     """
     handle the first FFN log layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -565,22 +637,24 @@ def ffn_handle_first_mul_layer(man, element, cst,  size, predecessors):
     res : None
 
     """
-    
+
     try:
         ffn_handle_first_mul_layer_c = fppoly_api.ffn_handle_first_mul_layer
         ffn_handle_first_mul_layer_c.restype = None
-        ffn_handle_first_mul_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),  c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_mul_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),
+                                                 c_size_t, POINTER(c_size_t)]
         ffn_handle_first_mul_layer_c(man, element, cst, size, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_mul_layer" from "libfppoly.so"')
-        print(inst)	
-    
+        print(inst)
+
     return
 
-def ffn_handle_first_log_layer_no_alloc(man, element,weights, bias,  size, num_pixels, predecessors):
+
+def ffn_handle_first_log_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the first FFN log layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -599,24 +673,28 @@ def ffn_handle_first_log_layer_no_alloc(man, element,weights, bias,  size, num_p
         -------
         res : ElinaAbstract0Ptr
         Pointer to the new abstract object.
-        
+
         """
-    
+
     try:
         ffn_handle_first_log_layer_no_alloc_c = fppoly_api.ffn_handle_first_log_layer_no_alloc
         ffn_handle_first_log_layer_no_alloc_c.restype = None
-        ffn_handle_first_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),  c_size_t, c_size_t, POINTER(c_size_t)]
-        ffn_handle_first_log_layer_no_alloc_c(man,element,weights, bias,  size, num_pixels, predecessors)
+        ffn_handle_first_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                          ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                          POINTER(c_size_t)]
+        ffn_handle_first_log_layer_no_alloc_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_log_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
     return
 
-def ffn_handle_intermediate_affine_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_affine_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                         use_area_heuristic):
     """
     handle the intermediate FFN ReLU layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -644,16 +722,21 @@ def ffn_handle_intermediate_affine_layer(man, element, weights, bias, num_out_ne
     try:
         ffn_handle_intermediate_affine_layer_c = fppoly_api.ffn_handle_intermediate_affine_layer
         ffn_handle_intermediate_affine_layer_c.restype = None
-        ffn_handle_intermediate_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_affine_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                           ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                           POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_affine_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                               predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_affine_layer" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_affine_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_affine_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                  predecessors, use_area_heuristic):
     """
         handle the intermediate FFN ReLU layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -675,22 +758,29 @@ def ffn_handle_intermediate_affine_layer_no_alloc(man, element, weights, bias, n
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_intermediate_affine_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_affine_layer_no_alloc
         ffn_handle_intermediate_affine_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_affine_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_affine_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_affine_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                    ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                    POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_affine_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                        predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_affine_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_relu_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+# sunbing
+
+def rnn_handle_intermediate_relu_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                       use_area_heuristic):
     """
     handle the intermediate FFN ReLU layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -708,7 +798,49 @@ def ffn_handle_intermediate_relu_layer(man, element, weights, bias, num_out_neur
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic    
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_intermediate_relu_layer_c = fppoly_api.ffn_handle_intermediate_relu_layer_
+        ffn_handle_intermediate_relu_layer_c.restype = None
+        ffn_handle_intermediate_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                         ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t,
+                                                         c_size_t, POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_relu_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons,
+                                             predecessors, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_intermediate_relu_layer" from "libfppoly.so"')
+        print(inst)
+
+
+def ffn_handle_intermediate_relu_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                       use_area_heuristic):
+    """
+    handle the intermediate FFN ReLU layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix.
+    bias: POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        number of output neurons
+    num_in_neurons: c_size_t
+	number of input neurons
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
     Returns
     -------
     None
@@ -718,18 +850,21 @@ def ffn_handle_intermediate_relu_layer(man, element, weights, bias, num_out_neur
     try:
         ffn_handle_intermediate_relu_layer_c = fppoly_api.ffn_handle_intermediate_relu_layer
         ffn_handle_intermediate_relu_layer_c.restype = None
-        ffn_handle_intermediate_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_relu_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                         ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                         POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_relu_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                             use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_relu_layer" from "libfppoly.so"')
         print(inst)
 
 
-
-def ffn_handle_intermediate_relu_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+def ffn_handle_intermediate_relu_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                predecessors, use_area_heuristic):
     """
         handle the intermediate FFN ReLU layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -747,26 +882,31 @@ def ffn_handle_intermediate_relu_layer_no_alloc(man, element, weights, bias, num
         predecessors:
         the layers before the current layer
         use_area_heuristic: c_bool
-        whether to use area heuristic 
+        whether to use area heuristic
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_intermediate_relu_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_relu_layer_no_alloc
         ffn_handle_intermediate_relu_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_relu_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                  ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                  POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_relu_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                      predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_relu_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_sigmoid_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_sigmoid_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                          use_area_heuristic):
     """
     handle the intermediate FFN Sigmoid layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -784,26 +924,31 @@ def ffn_handle_intermediate_sigmoid_layer(man, element, weights, bias, num_out_n
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic    
+        whether to use area heuristic
     Returns
     -------
     None
 
     """
-    
+
     try:
         ffn_handle_intermediate_sigmoid_layer_c = fppoly_api.ffn_handle_intermediate_sigmoid_layer
         ffn_handle_intermediate_sigmoid_layer_c.restype = None
-        ffn_handle_intermediate_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        ffn_handle_intermediate_sigmoid_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                            ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                            POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_sigmoid_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_sigmoid_layer" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                   predecessors, use_area_heuristic):
     """
         handle the intermediate FFN Sigmoid layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -821,27 +966,31 @@ def ffn_handle_intermediate_sigmoid_layer_no_alloc(man, element, weights, bias, 
         predecessors:
         the layers before the current layer
         use_area_heuristic: c_bool
-            whether to use area heuristic 
+            whether to use area heuristic
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_intermediate_sigmoid_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_sigmoid_layer_no_alloc
         ffn_handle_intermediate_sigmoid_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_sigmoid_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                     ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                     POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_sigmoid_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                         predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_sigmoid_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_intermediate_tanh_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+def ffn_handle_intermediate_tanh_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                       use_area_heuristic):
     """
     handle the intermediate FFN Tanh layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -859,28 +1008,30 @@ def ffn_handle_intermediate_tanh_layer(man, element, weights, bias, num_out_neur
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic 
+        whether to use area heuristic
     Returns
     -------
     None
 
     """
-    
+
     try:
         ffn_handle_intermediate_tanh_layer_c = fppoly_api.ffn_handle_intermediate_tanh_layer
         ffn_handle_intermediate_tanh_layer_c.restype = None
-        ffn_handle_intermediate_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_tanh_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                         ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                         POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_tanh_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                             use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_tanh_layer" from "libfppoly.so"')
         print(inst)
 
 
-
 def ffn_handle_intermediate_sub_layer(man, element, bias, is_minuend, num_in_neurons, predecessors, use_area_heuristic):
     """
     handle the intermediate FFN Sub layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -896,26 +1047,29 @@ def ffn_handle_intermediate_sub_layer(man, element, bias, is_minuend, num_in_neu
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic 
+        whether to use area heuristic
     Returns
     -------
     None
 
     """
-    
+
     try:
         ffn_handle_intermediate_sub_layer_c = fppoly_api.ffn_handle_intermediate_sub_layer
         ffn_handle_intermediate_sub_layer_c.restype = None
-        ffn_handle_intermediate_sub_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), c_bool, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_sub_layer_c(man,element, bias, is_minuend, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_sub_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),
+                                                        c_bool, c_size_t, POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_sub_layer_c(man, element, bias, is_minuend, num_in_neurons, predecessors,
+                                            use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_sub_layer" from "libfppoly.so"')
         print(inst)
 
+
 def ffn_handle_intermediate_mul_layer(man, element, bias, num_in_neurons, predecessors, use_area_heuristic):
     """
     handle the intermediate FFN Mul layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -929,27 +1083,29 @@ def ffn_handle_intermediate_mul_layer(man, element, bias, num_in_neurons, predec
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic 
+        whether to use area heuristic
     Returns
     -------
     None
 
     """
-    
+
     try:
         ffn_handle_intermediate_mul_layer_c = fppoly_api.ffn_handle_intermediate_mul_layer
         ffn_handle_intermediate_mul_layer_c.restype = None
-        ffn_handle_intermediate_mul_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_mul_layer_c(man,element, bias, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_mul_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),
+                                                        c_size_t, POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_mul_layer_c(man, element, bias, num_in_neurons, predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_mul_layer" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_intermediate_tanh_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+def ffn_handle_intermediate_tanh_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                predecessors, use_area_heuristic):
     """
         handle the intermediate FFN Tanh layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -967,26 +1123,31 @@ def ffn_handle_intermediate_tanh_layer_no_alloc(man, element, weights, bias, num
         predecessors:
         the layers before the current layer
         use_area_heuristic: c_bool
-             whether to use area heuristic         
+             whether to use area heuristic
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_intermediate_tanh_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_tanh_layer_no_alloc
         ffn_handle_intermediate_tanh_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        ffn_handle_intermediate_tanh_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                  ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                  POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_tanh_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                      predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_tanh_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_parabola_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_parabola_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                           use_area_heuristic):
     """
     handle the intermediate FFN Parabolic layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1004,102 +1165,31 @@ def ffn_handle_intermediate_parabola_layer(man, element, weights, bias, num_out_
     predecessors:
         the layers before the current layer
     use_area_heuristic: c_bool
-        whether to use area heuristic 
+        whether to use area heuristic
     Returns
     -------
     None
 
     """
-    
+
     try:
         ffn_handle_intermediate_parabola_layer_c = fppoly_api.ffn_handle_intermediate_parabola_layer
         ffn_handle_intermediate_parabola_layer_c.restype = None
-        ffn_handle_intermediate_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        ffn_handle_intermediate_parabola_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                             ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                             POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_parabola_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                 predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_parabola_layer" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_intermediate_parabola_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
+
+def ffn_handle_intermediate_parabola_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                    predecessors, use_area_heuristic):
     """
         handle the intermediate FFN Parabolic layer
-        
-        Parameters
-        ----------
-        man : ElinaManagerPtr
-        Pointer to the ElinaManager.
-        element : ElinaAbstract0Ptr
-        Pointer to the abstract element
-        weights: POINTER(POINTER(c_double))
-        The weight matrix.
-        bias: POINTER(c_size_t)
-        The bias vector
-        num_out_neurons: c_size_t
-        number of output neurons
-        num_in_neurons: c_size_t
-        number of input neurons
-        predecessors:
-        the layers before the current layer
-        use_area_heuristic: c_bool
-        whether to use area heuristic 
-        Returns
-        -------
-        None
-        
-        """
-    
-    try:
-        ffn_handle_intermediate_parabola_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_parabola_layer_no_alloc
-        ffn_handle_intermediate_parabola_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        ffn_handle_intermediate_parabola_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
-    except Exception as inst:
-        print('Problem with loading/calling "ffn_handle_intermediate_parabola_layer_no_alloc" from "libfppoly.so"')
-        print(inst)
 
-
-def ffn_handle_intermediate_log_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
-    """
-    handle the intermediate FFN Log layer
-    
-    Parameters
-    ----------
-    man : ElinaManagerPtr
-        Pointer to the ElinaManager.
-    element : ElinaAbstract0Ptr
-        Pointer to the abstract element
-    weights: POINTER(POINTER(c_double))
-        The weight matrix.
-    bias: POINTER(c_size_t)
-        The bias vector
-    num_out_neurons: c_size_t
-        number of output neurons
-    num_in_neurons: c_size_t
-	number of input neurons
-    predecessors:
-        the layers before the current layer
-    use_area_heuristic: c_bool
-        whether to use area heuristic 
-    Returns
-    -------
-    None
-
-    """
-    
-    try:
-        ffn_handle_intermediate_log_layer_c = fppoly_api.ffn_handle_intermediate_log_layer
-        ffn_handle_intermediate_log_layer_c.restype = None
-        ffn_handle_intermediate_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool]
-        ffn_handle_intermediate_log_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
-    except Exception as inst:
-        print('Problem with loading/calling "ffn_handle_intermediate_log_layer" from "libfppoly.so"')
-        print(inst)
-
-
-def ffn_handle_intermediate_log_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic):
-    """
-        handle the intermediate FFN Log layer
-        
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1121,22 +1211,111 @@ def ffn_handle_intermediate_log_layer_no_alloc(man, element, weights, bias, num_
         Returns
         -------
         None
-        
+
         """
-    
+
+    try:
+        ffn_handle_intermediate_parabola_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_parabola_layer_no_alloc
+        ffn_handle_intermediate_parabola_layer_no_alloc_c.restype = None
+        ffn_handle_intermediate_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                      ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                      POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_parabola_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                          predecessors, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "ffn_handle_intermediate_parabola_layer_no_alloc" from "libfppoly.so"')
+        print(inst)
+
+
+def ffn_handle_intermediate_log_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                      use_area_heuristic):
+    """
+    handle the intermediate FFN Log layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix.
+    bias: POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        number of output neurons
+    num_in_neurons: c_size_t
+	number of input neurons
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_intermediate_log_layer_c = fppoly_api.ffn_handle_intermediate_log_layer
+        ffn_handle_intermediate_log_layer_c.restype = None
+        ffn_handle_intermediate_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                        ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                        POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_log_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                            use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "ffn_handle_intermediate_log_layer" from "libfppoly.so"')
+        print(inst)
+
+
+def ffn_handle_intermediate_log_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                               predecessors, use_area_heuristic):
+    """
+        handle the intermediate FFN Log layer
+
+        Parameters
+        ----------
+        man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+        element : ElinaAbstract0Ptr
+        Pointer to the abstract element
+        weights: POINTER(POINTER(c_double))
+        The weight matrix.
+        bias: POINTER(c_size_t)
+        The bias vector
+        num_out_neurons: c_size_t
+        number of output neurons
+        num_in_neurons: c_size_t
+        number of input neurons
+        predecessors:
+        the layers before the current layer
+        use_area_heuristic: c_bool
+        whether to use area heuristic
+        Returns
+        -------
+        None
+
+        """
+
     try:
         ffn_handle_intermediate_log_layer_no_alloc_c = fppoly_api.ffn_handle_intermediate_log_layer_no_alloc
         ffn_handle_intermediate_log_layer_no_alloc_c.restype = None
-        ffn_handle_intermediate_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        ffn_handle_intermediate_log_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, use_area_heuristic)
+        ffn_handle_intermediate_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                                 ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                                 POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_log_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                     predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_intermediate_log_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_relu_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_relu, use_area_heuristic):
+
+def rnn_handle_last_relu_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                               has_relu, use_area_heuristic):
     """
     handle the last FFN ReLU layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1144,7 +1323,96 @@ def ffn_handle_last_relu_layer(man, element, weights, bias, num_out_neurons, num
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element
     weights: POINTER(POINTER(c_double))
-        The weight matrix 
+        The weight matrix
+    bias : POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        The number of output neurons
+    num_in_neurons: c_size_t
+	The number of input_neurons
+    predecessors:
+        the layers before the current layer
+    has_relu: c_bool
+        if the last layer has a ReLU activation
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_last_relu_layer_c = fppoly_api.ffn_handle_last_relu_layer_
+        ffn_handle_last_relu_layer_c.restype = None
+        ffn_handle_last_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t,
+                                                 POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_relu_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                     has_relu, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_last_relu_layer" from "libfppoly.so"')
+        print(inst)
+
+# sunbing
+def rnn_handle_last_relu_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors, has_relu,
+                               use_area_heuristic):
+    """
+    handle the last FFN ReLU layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0 abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix
+    bias : POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        The number of output neurons
+    num_in_neurons: c_size_t
+	The number of input_neurons
+    predecessors:
+        the layers before the current layer
+    has_relu: c_bool
+        if the last layer has a ReLU activation
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_last_relu_layer_c = fppoly_api.ffn_handle_last_relu_layer_
+        ffn_handle_last_relu_layer_c.restype = None
+        ffn_handle_last_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t),
+                                                 c_bool, c_bool]
+        ffn_handle_last_relu_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                     has_relu, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_last_relu_layer" from "libfppoly.so"')
+        print(inst)
+
+
+
+def ffn_handle_last_relu_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_relu,
+                               use_area_heuristic):
+    """
+    handle the last FFN ReLU layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0 abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix
     bias : POINTER(c_size_t)
         The bias vector
     num_out_neurons: c_size_t
@@ -1166,17 +1434,21 @@ def ffn_handle_last_relu_layer(man, element, weights, bias, num_out_neurons, num
     try:
         ffn_handle_last_relu_layer_c = fppoly_api.ffn_handle_last_relu_layer
         ffn_handle_last_relu_layer_c.restype = None
-        ffn_handle_last_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool, c_bool]
-        ffn_handle_last_relu_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_relu, use_area_heuristic)
+        ffn_handle_last_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),
+                                                 c_bool, c_bool]
+        ffn_handle_last_relu_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                     has_relu, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_relu_layer" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_last_relu_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,  has_relu, use_area_heuristic):
+def ffn_handle_last_relu_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                        has_relu, use_area_heuristic):
     """
         handle the last FFN ReLU layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1200,22 +1472,27 @@ def ffn_handle_last_relu_layer_no_alloc(man, element, weights, bias, num_out_neu
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_last_relu_layer_no_alloc_c = fppoly_api.ffn_handle_last_relu_layer_no_alloc
         ffn_handle_last_relu_layer_no_alloc_c.restype = None
-        ffn_handle_last_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_relu_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_relu, use_area_heuristic)
+        ffn_handle_last_relu_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                          ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                          POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_relu_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                              predecessors, has_relu, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_relu_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_sigmoid_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_sigmoid, use_area_heuristic):
+
+def ffn_handle_last_sigmoid_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                  has_sigmoid, use_area_heuristic):
     """
     handle the last FFN Sigmoid layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1223,7 +1500,7 @@ def ffn_handle_last_sigmoid_layer(man, element, weights, bias, num_out_neurons, 
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element
     weights: POINTER(POINTER(c_double))
-        The weight matrix 
+        The weight matrix
     bias : POINTER(c_size_t)
         The bias vector
     num_out_neurons: c_size_t
@@ -1241,20 +1518,25 @@ def ffn_handle_last_sigmoid_layer(man, element, weights, bias, num_out_neurons, 
     None
 
     """
-    
+
     try:
         ffn_handle_last_sigmoid_layer_c = fppoly_api.ffn_handle_last_sigmoid_layer
         ffn_handle_last_sigmoid_layer_c.restype = None
-        ffn_handle_last_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_sigmoid_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_sigmoid, use_area_heuristic)
+        ffn_handle_last_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                    ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),
+                                                    c_bool, c_bool]
+        ffn_handle_last_sigmoid_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                        has_sigmoid, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_sigmoid_layer" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_sigmoid, use_area_heuristic):
+
+def ffn_handle_last_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                           has_sigmoid, use_area_heuristic):
     """
         handle the last FFN Sigmoid layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1278,23 +1560,27 @@ def ffn_handle_last_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_last_sigmoid_layer_no_alloc_c = fppoly_api.ffn_handle_last_sigmoid_layer_no_alloc
         ffn_handle_last_sigmoid_layer_no_alloc_c.restype = None
-        ffn_handle_last_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_sigmoid_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_sigmoid, use_area_heuristic)
+        ffn_handle_last_sigmoid_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                             ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                             POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_sigmoid_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                 predecessors, has_sigmoid, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_sigmoid_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_last_tanh_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_tanh, use_area_heuristic):
+def ffn_handle_last_tanh_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_tanh,
+                               use_area_heuristic):
     """
     handle the last FFN Tanh layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1302,7 +1588,7 @@ def ffn_handle_last_tanh_layer(man, element, weights, bias, num_out_neurons, num
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element
     weights: POINTER(POINTER(c_double))
-        The weight matrix 
+        The weight matrix
     bias : POINTER(c_size_t)
         The bias vector
     num_out_neurons: c_size_t
@@ -1320,21 +1606,25 @@ def ffn_handle_last_tanh_layer(man, element, weights, bias, num_out_neurons, num
     None
 
     """
-    
+
     try:
         ffn_handle_last_tanh_layer_c = fppoly_api.ffn_handle_last_tanh_layer
         ffn_handle_last_tanh_layer_c.restype = None
-        ffn_handle_last_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_tanh_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_tanh, use_area_heuristic)
+        ffn_handle_last_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),
+                                                 c_bool, c_bool]
+        ffn_handle_last_tanh_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                     has_tanh, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_tanh_layer" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_last_tanh_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_tanh, use_area_heuristic):
+def ffn_handle_last_tanh_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                        has_tanh, use_area_heuristic):
     """
         handle the last FFN Tanh layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1358,22 +1648,27 @@ def ffn_handle_last_tanh_layer_no_alloc(man, element, weights, bias, num_out_neu
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_last_tanh_layer_no_alloc_c = fppoly_api.ffn_handle_last_tanh_layer_no_alloc
         ffn_handle_last_tanh_layer_no_alloc_c.restype = None
-        ffn_handle_last_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_tanh_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_tanh, use_area_heuristic)
+        ffn_handle_last_tanh_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                          ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                          POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_tanh_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                              predecessors, has_tanh, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_tanh_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_parabola_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_parabola, use_area_heuristic):
+
+def ffn_handle_last_parabola_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                   has_parabola, use_area_heuristic):
     """
     handle the last FFN Parabolic layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1381,7 +1676,7 @@ def ffn_handle_last_parabola_layer(man, element, weights, bias, num_out_neurons,
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element
     weights: POINTER(POINTER(c_double))
-        The weight matrix 
+        The weight matrix
     bias : POINTER(c_size_t)
         The bias vector
     num_out_neurons: c_size_t
@@ -1399,21 +1694,25 @@ def ffn_handle_last_parabola_layer(man, element, weights, bias, num_out_neurons,
     None
 
     """
-    
+
     try:
         ffn_handle_last_parabola_layer_c = fppoly_api.ffn_handle_last_parabola_layer
         ffn_handle_last_parabola_layer_c.restype = None
-        ffn_handle_last_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_parabola_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_parabola, use_area_heuristic)
+        ffn_handle_last_parabola_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                     ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),
+                                                     c_bool, c_bool]
+        ffn_handle_last_parabola_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                         has_parabola, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_parabola_layer" from "libfppoly.so"')
         print(inst)
 
 
-def ffn_handle_last_parabola_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_parabola, use_area_heuristic):
+def ffn_handle_last_parabola_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                            has_parabola, use_area_heuristic):
     """
         handle the last FFN Parabolic layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1437,22 +1736,27 @@ def ffn_handle_last_parabola_layer_no_alloc(man, element, weights, bias, num_out
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_last_parabola_layer_no_alloc_c = fppoly_api.ffn_handle_last_parabola_layer_no_alloc
         ffn_handle_last_parabola_layer_no_alloc_c.restype = None
-        ffn_handle_last_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_parabola_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_parabola, use_area_heuristic)
+        ffn_handle_last_parabola_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                              ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                              POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_parabola_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons,
+                                                  predecessors, has_parabola, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_parabola_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_log_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_log, use_area_heuristic):
+
+def ffn_handle_last_log_layer(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_log,
+                              use_area_heuristic):
     """
     handle the last FFN Log layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1460,7 +1764,7 @@ def ffn_handle_last_log_layer(man, element, weights, bias, num_out_neurons, num_
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element
     weights: POINTER(POINTER(c_double))
-        The weight matrix 
+        The weight matrix
     bias : POINTER(c_size_t)
         The bias vector
     num_out_neurons: c_size_t
@@ -1478,20 +1782,25 @@ def ffn_handle_last_log_layer(man, element, weights, bias, num_out_neurons, num_
     None
 
     """
-    
+
     try:
         ffn_handle_last_log_layer_c = fppoly_api.ffn_handle_last_log_layer
         ffn_handle_last_log_layer_c.restype = None
-        ffn_handle_last_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),c_bool, c_bool]
-        ffn_handle_last_log_layer_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_log, use_area_heuristic)
+        ffn_handle_last_log_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t),
+                                                c_bool, c_bool]
+        ffn_handle_last_log_layer_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_log,
+                                    use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_log_layer" from "libfppoly.so"')
         print(inst)
 
-def ffn_handle_last_log_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors, has_log, use_area_heuristic):
+
+def ffn_handle_last_log_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                       has_log, use_area_heuristic):
     """
         handle the last FFN Log layer
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -1513,22 +1822,26 @@ def ffn_handle_last_log_layer_no_alloc(man, element, weights, bias, num_out_neur
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         ffn_handle_last_log_layer_no_alloc_c = fppoly_api.ffn_handle_last_log_layer_no_alloc
         ffn_handle_last_log_layer_no_alloc_c.restype = None
-        ffn_handle_last_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool, c_bool]
-        ffn_handle_last_log_layer_no_alloc_c(man,element,weights,bias, num_out_neurons, num_in_neurons, predecessors, has_log, use_area_heuristic)
+        ffn_handle_last_log_layer_no_alloc_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                         ndpointer(ctypes.c_double), c_size_t, c_size_t,
+                                                         POINTER(c_size_t), c_bool, c_bool]
+        ffn_handle_last_log_layer_no_alloc_c(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
+                                             has_log, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_last_log_layer_no_alloc" from "libfppoly.so"')
         print(inst)
 
+
 def is_greater(man, element, y, x, use_area_heuristic):
     """
-     Check if y is strictly greater than x in the abstract element 
-    
+     Check if y is strictly greater than x in the abstract element
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1546,21 +1859,23 @@ def is_greater(man, element, y, x, use_area_heuristic):
     res = boolean
 
     """
-    res= None
+    res = None
     try:
         is_greater_c = fppoly_api.is_greater
         is_greater_c.restype = c_bool
         is_greater_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ElinaDim, ElinaDim, c_bool]
-        res = is_greater_c(man,element,y, x, use_area_heuristic)
+        res = is_greater_c(man, element, y, x, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "is_greater" from "libfppoly.so"')
         print(inst)
     return res
 
-def conv_handle_first_layer(man, element, filter_weights, filter_bias,  input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left, has_bias, predecessors):
+
+def conv_handle_first_layer(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides,
+                            output_size, pad_top, pad_left, has_bias, predecessors):
     """
     Convolutional Matrix multiplication in the first layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1573,7 +1888,7 @@ def conv_handle_first_layer(man, element, filter_weights, filter_bias,  input_si
         filter biases
     input_size: POINTER(c_size_t)
         size of the input
-    filter_size: POINTER(c_size_t)  
+    filter_size: POINTER(c_size_t)
         size of the filters
     num_filters: c_size_t
         number of filters
@@ -1593,17 +1908,24 @@ def conv_handle_first_layer(man, element, filter_weights, filter_bias,  input_si
     try:
         conv_handle_first_layer_c = fppoly_api.conv_handle_first_layer
         conv_handle_first_layer_c.restype = None
-        conv_handle_first_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), ndpointer(ctypes.c_double), ndpointer(ctypes.c_size_t), POINTER(c_size_t), c_size_t, POINTER(c_size_t), POINTER(c_size_t),c_size_t, c_size_t, c_bool, POINTER(c_size_t)]
-        conv_handle_first_layer_c(man,element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left, has_bias, predecessors)
+        conv_handle_first_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double),
+                                              ndpointer(ctypes.c_double), ndpointer(ctypes.c_size_t), POINTER(c_size_t),
+                                              c_size_t, POINTER(c_size_t), POINTER(c_size_t), c_size_t, c_size_t,
+                                              c_bool, POINTER(c_size_t)]
+        conv_handle_first_layer_c(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters,
+                                  strides, output_size, pad_top, pad_left, has_bias, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "conv_handle_first_layer" from "libfppoly.so"')
         print(inst)
     return
 
-def conv_handle_intermediate_relu_layer(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left,  has_bias, predecessors, use_area_heuristic):
+
+def conv_handle_intermediate_relu_layer(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters,
+                                        strides, output_size, pad_top, pad_left, has_bias, predecessors,
+                                        use_area_heuristic):
     """
     Convolutional Matrix multiplication in an Intermediate layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1616,7 +1938,7 @@ def conv_handle_intermediate_relu_layer(man, element, filter_weights, filter_bia
         filter biases
     input_size: POINTER(c_size_t)
         size of the input
-    filter_size: POINTER(c_size_t)  
+    filter_size: POINTER(c_size_t)
         size of the filters
     num_filters: c_size_t
         number of filters
@@ -1638,17 +1960,25 @@ def conv_handle_intermediate_relu_layer(man, element, filter_weights, filter_bia
     try:
         conv_handle_intermediate_relu_layer_c = fppoly_api.conv_handle_intermediate_relu_layer
         conv_handle_intermediate_relu_layer_c.restype = None
-        conv_handle_intermediate_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), ndpointer(ctypes.c_double), ndpointer(ctypes.c_size_t), POINTER(c_size_t), c_size_t, POINTER(c_size_t), POINTER(c_size_t), c_size_t, c_size_t, c_bool, POINTER(c_size_t), c_bool]
-        conv_handle_intermediate_relu_layer_c(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left, has_bias, predecessors, use_area_heuristic)
+        conv_handle_intermediate_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr,
+                                                          ndpointer(ctypes.c_double), ndpointer(ctypes.c_double),
+                                                          ndpointer(ctypes.c_size_t), POINTER(c_size_t), c_size_t,
+                                                          POINTER(c_size_t), POINTER(c_size_t), c_size_t, c_size_t,
+                                                          c_bool, POINTER(c_size_t), c_bool]
+        conv_handle_intermediate_relu_layer_c(man, element, filter_weights, filter_bias, input_size, filter_size,
+                                              num_filters, strides, output_size, pad_top, pad_left, has_bias,
+                                              predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "conv_handle_intermediate_relu_layer" from "libfppoly.so"')
         print(inst)
 
 
-def conv_handle_intermediate_affine_layer(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left,  has_bias, predecessors, use_area_heuristic):
+def conv_handle_intermediate_affine_layer(man, element, filter_weights, filter_bias, input_size, filter_size,
+                                          num_filters, strides, output_size, pad_top, pad_left, has_bias, predecessors,
+                                          use_area_heuristic):
     """
     Convolutional Matrix multiplication in an Intermediate layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1661,7 +1991,7 @@ def conv_handle_intermediate_affine_layer(man, element, filter_weights, filter_b
         filter biases
     input_size: POINTER(c_size_t)
         size of the input
-    filter_size: POINTER(c_size_t)  
+    filter_size: POINTER(c_size_t)
         size of the filters
     num_filters: c_size_t
         number of filters
@@ -1683,8 +2013,14 @@ def conv_handle_intermediate_affine_layer(man, element, filter_weights, filter_b
     try:
         conv_handle_intermediate_affine_layer_c = fppoly_api.conv_handle_intermediate_affine_layer
         conv_handle_intermediate_affine_layer_c.restype = None
-        conv_handle_intermediate_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_double), ndpointer(ctypes.c_double), ndpointer(ctypes.c_size_t), POINTER(c_size_t), c_size_t, POINTER(c_size_t), POINTER(c_size_t), c_size_t, c_size_t, c_bool, POINTER(c_size_t), c_bool]
-        conv_handle_intermediate_affine_layer_c(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides, output_size, pad_top, pad_left, has_bias, predecessors, use_area_heuristic)
+        conv_handle_intermediate_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr,
+                                                            ndpointer(ctypes.c_double), ndpointer(ctypes.c_double),
+                                                            ndpointer(ctypes.c_size_t), POINTER(c_size_t), c_size_t,
+                                                            POINTER(c_size_t), POINTER(c_size_t), c_size_t, c_size_t,
+                                                            c_bool, POINTER(c_size_t), c_bool]
+        conv_handle_intermediate_affine_layer_c(man, element, filter_weights, filter_bias, input_size, filter_size,
+                                                num_filters, strides, output_size, pad_top, pad_left, has_bias,
+                                                predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "conv_handle_intermediate_affine_layer" from "libfppoly.so"')
         print(inst)
@@ -1693,7 +2029,7 @@ def conv_handle_intermediate_affine_layer(man, element, filter_weights, filter_b
 def handle_maxpool_layer(man, element, pool_size, input_size, predecessors):
     """
     handle the Maxpool layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1701,7 +2037,7 @@ def handle_maxpool_layer(man, element, pool_size, input_size, predecessors):
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element.
     pool_size: POINTER(c_size_t)
-        The size of the Maxpool filter 
+        The size of the Maxpool filter
     input_size : POINTER(c_size_t)
         The number of variables on which Maxpool will be applied.
     predecessors:
@@ -1712,21 +2048,23 @@ def handle_maxpool_layer(man, element, pool_size, input_size, predecessors):
         Number of neurons in the last layer
 
     """
-    res=None
+    res = None
     try:
         handle_maxpool_layer_c = fppoly_api.handle_maxpool_layer
         handle_maxpool_layer_c.restype = c_size_t
-        handle_maxpool_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_size_t), ndpointer(ctypes.c_size_t), POINTER(c_size_t)]
+        handle_maxpool_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ndpointer(ctypes.c_size_t),
+                                           ndpointer(ctypes.c_size_t), POINTER(c_size_t)]
         res = handle_maxpool_layer_c(man, element, pool_size, input_size, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "handle_maxpool_layer" from "libfppoly.so"')
         print(inst)
     return res
 
+
 def handle_residual_relu_layer(man, element, num_neurons, predecessors, use_area_heuristic):
     """
     handle the Residual layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1734,7 +2072,7 @@ def handle_residual_relu_layer(man, element, num_neurons, predecessors, use_area
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element.
     num_neurons: c_size_t
-        The number of neurons in the residual layer 
+        The number of neurons in the residual layer
     predecessors:
         the layers before the current layer
     Returns
@@ -1746,7 +2084,8 @@ def handle_residual_relu_layer(man, element, num_neurons, predecessors, use_area
     try:
         handle_residual_relu_layer_c = fppoly_api.handle_residual_relu_layer
         handle_residual_relu_layer_c.restype = None
-        handle_residual_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, POINTER(c_size_t), c_bool]
+        handle_residual_relu_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, POINTER(c_size_t),
+                                                 c_bool]
         handle_residual_relu_layer_c(man, element, num_neurons, predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "handle_residual_relu_layer" from "libfppoly.so"')
@@ -1756,7 +2095,7 @@ def handle_residual_relu_layer(man, element, num_neurons, predecessors, use_area
 def handle_residual_affine_layer(man, element, num_neurons, predecessors, use_area_heuristic):
     """
     handle the Residual layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1764,7 +2103,7 @@ def handle_residual_affine_layer(man, element, num_neurons, predecessors, use_ar
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0 abstract element.
     num_neurons: c_size_t
-        The number of neurons in the residual layer 
+        The number of neurons in the residual layer
     predecessors:
         the layers before the current layer
     Returns
@@ -1776,18 +2115,18 @@ def handle_residual_affine_layer(man, element, num_neurons, predecessors, use_ar
     try:
         handle_residual_affine_layer_c = fppoly_api.handle_residual_affine_layer
         handle_residual_affine_layer_c.restype = None
-        handle_residual_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, POINTER(c_size_t), c_bool]
+        handle_residual_affine_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, POINTER(c_size_t),
+                                                   c_bool]
         handle_residual_affine_layer_c(man, element, num_neurons, predecessors, use_area_heuristic)
     except Exception as inst:
         print('Problem with loading/calling "handle_residual_affine_layer" from "libfppoly.so"')
         print(inst)
 
 
-
-def box_for_neuron(man, element,layerno, neuron_no):
+def box_for_neuron(man, element, layerno, neuron_no):
     """
     returns bounds for a neuron in a layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1810,17 +2149,18 @@ def box_for_neuron(man, element,layerno, neuron_no):
         box_for_neuron_c = fppoly_api.box_for_neuron
         box_for_neuron_c.restype = ElinaIntervalPtr
         box_for_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t]
-        interval = box_for_neuron_c(man, element,layerno, neuron_no)
+        interval = box_for_neuron_c(man, element, layerno, neuron_no)
     except:
         print('Problem with loading/calling "box_for_neuron" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t to the function')
 
     return interval
 
-def box_for_layer(man, element,layerno):
+
+def box_for_layer(man, element, layerno):
     """
     returns bounds for all neurons in a layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1841,17 +2181,18 @@ def box_for_layer(man, element,layerno):
         box_for_layer_c = fppoly_api.box_for_layer
         box_for_layer_c.restype = ElinaIntervalArray
         box_for_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
-        interval_array = box_for_layer_c(man, element,layerno)
+        interval_array = box_for_layer_c(man, element, layerno)
     except:
         print('Problem with loading/calling "box_for_layer" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
 
     return interval_array
 
-def get_num_neurons_in_layer(man, element,layerno):
+
+def get_num_neurons_in_layer(man, element, layerno):
     """
     returns the number of neurons in a layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1872,7 +2213,7 @@ def get_num_neurons_in_layer(man, element,layerno):
         get_num_neurons_in_layer_c = fppoly_api.get_num_neurons_in_layer
         get_num_neurons_in_layer_c.restype = c_size_t
         get_num_neurons_in_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
-        res = get_num_neurons_in_layer_c(man, element,layerno)
+        res = get_num_neurons_in_layer_c(man, element, layerno)
     except:
         print('Problem with loading/calling "get_num_neurons_in_layer" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
@@ -1880,10 +2221,10 @@ def get_num_neurons_in_layer(man, element,layerno):
     return res
 
 
-def update_bounds_for_neuron(man, element,layerno, neuron_no, lb, ub):
+def update_bounds_for_neuron(man, element, layerno, neuron_no, lb, ub):
     """
     returns bounds for a neuron in a layer
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1904,22 +2245,22 @@ def update_bounds_for_neuron(man, element,layerno, neuron_no, lb, ub):
 
     """
 
-    
     try:
         update_bounds_for_neuron_c = fppoly_api.update_bounds_for_neuron
         update_bounds_for_neuron_c.restype = None
-        update_bounds_for_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t, c_double, c_double]
-        update_bounds_for_neuron_c(man, element,layerno, neuron_no, lb, ub)
+        update_bounds_for_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t, c_double,
+                                               c_double]
+        update_bounds_for_neuron_c(man, element, layerno, neuron_no, lb, ub)
     except:
         print('Problem with loading/calling "update_bounds_for_neuron" from "fppoly.so"')
-        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t, c_double, c_double to the function')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t, c_double, c_double to the function')
 
 
-
-def get_bounds_for_linexpr0(man,element,linexpr0,layerno):
+def get_bounds_for_linexpr0(man, element, linexpr0, layerno):
     """
     returns bounds for a linexpr0 over neurons in "layerno"
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1945,15 +2286,16 @@ def get_bounds_for_linexpr0(man,element,linexpr0,layerno):
         interval = get_bounds_for_linexpr0_c(man, element, linexpr0, layerno)
     except:
         print('Problem with loading/calling "get_bounds_for_linexpr0" from "fppoly.so"')
-        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, ElinaLinexpr0Ptr, c_size_t to the function')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, ElinaLinexpr0Ptr, c_size_t to the function')
 
     return interval
-    
 
-def get_lexpr_for_output_neuron(man,element,i):
+
+def get_lexpr_for_output_neuron(man, element, i):
     """
     returns lower polyhedra constraint for the i-th output neuron in terms of the input neurons
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -1975,7 +2317,7 @@ def get_lexpr_for_output_neuron(man,element,i):
         get_lexpr_for_output_neuron_c = fppoly_api.get_lexpr_for_output_neuron
         get_lexpr_for_output_neuron_c.restype = ElinaLinexpr0Ptr
         get_lexpr_for_output_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
-        linexpr0 = get_lexpr_for_output_neuron_c(man,element,i)
+        linexpr0 = get_lexpr_for_output_neuron_c(man, element, i)
     except:
         print('Problem with loading/calling "get_lexpr_for_output_neuron" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
@@ -1983,10 +2325,10 @@ def get_lexpr_for_output_neuron(man,element,i):
     return linexpr0
 
 
-def get_uexpr_for_output_neuron(man,element,i):
+def get_uexpr_for_output_neuron(man, element, i):
     """
     returns lower polyhedra constraint for the i-th output neuron in terms of the input neurons
-    
+
     Parameters
     ----------
     man : ElinaManagerPtr
@@ -2008,7 +2350,7 @@ def get_uexpr_for_output_neuron(man,element,i):
         get_uexpr_for_output_neuron_c = fppoly_api.get_uexpr_for_output_neuron
         get_uexpr_for_output_neuron_c.restype = ElinaLinexpr0Ptr
         get_uexpr_for_output_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
-        linexpr0 = get_uexpr_for_output_neuron_c(man,element,i)
+        linexpr0 = get_uexpr_for_output_neuron_c(man, element, i)
     except:
         print('Problem with loading/calling "get_uexpr_for_output_neuron" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
@@ -2016,7 +2358,7 @@ def get_uexpr_for_output_neuron(man,element,i):
     return linexpr0
 
 
-def create_lstm_layer(man, element,h, predecessors):
+def create_lstm_layer(man, element, h, predecessors):
     """
     creates an lstm layer for the neural network, this should be called only once per each lstm layer
 
@@ -2038,26 +2380,26 @@ def create_lstm_layer(man, element,h, predecessors):
         create_lstm_layer_c = fppoly_api.create_lstm_layer
         create_lstm_layer_c.restype = None
         create_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, POINTER(c_size_t)]
-        create_lstm_layer_c(man,element,h, predecessors)
+        create_lstm_layer_c(man, element, h, predecessors)
     except:
         print('Problem with loading/calling "create_lstm_layer" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
 
     return
-   
+
 
 def handle_lstm_layer(man, element, weights, bias, d, h, predecessors, use_area_heuristic):
     """
     computes the hidden states and output vectors of the lstm unit, to be called at each time step after creating an LSTM unit
 
     Parameters
-    -----------    
+    -----------
     man : ElinaManagerPtr
         Pointer to the ElinaManager.
     element : ElinaAbstract0Ptr
         Pointer to the ElinaAbstract0.
     weights : POINTER(POINTER(c_double))
-        The weight matrix of size 4*h \times d+h, with h rows each for f_t, i_t, o_t, and c_t in order, 
+        The weight matrix of size 4*h \times d+h, with h rows each for f_t, i_t, o_t, and c_t in order,
         columnwise the first d entries correspond to x_t and the remaining correspond to h_t
     bias : POINTER(c_double)
         The bias vector of size 4*h, in the same format as weights
@@ -2076,19 +2418,21 @@ def handle_lstm_layer(man, element, weights, bias, d, h, predecessors, use_area_
     try:
         handle_lstm_layer_c = fppoly_api.handle_lstm_layer
         handle_lstm_layer_c.restype = None
-        handle_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
-        handle_lstm_layer_c(man,element,weights,bias,d,h, predecessors, use_area_heuristic)
+        handle_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),
+                                        c_size_t, c_size_t, POINTER(c_size_t), c_bool]
+        handle_lstm_layer_c(man, element, weights, bias, d, h, predecessors, use_area_heuristic)
     except:
         print('Problem with loading/calling "handle_lstm_layer" from "fppoly.so"')
-        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, c_bool to the function')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), c_size_t, c_size_t, c_bool to the function')
 
     return
 
 
-def free_non_lstm_layer_expr(man,element,layerno):
+def free_non_lstm_layer_expr(man, element, layerno):
     """
         returns bounds for a linexpr0 over neurons in "layerno"
-        
+
         Parameters
         ----------
         man : ElinaManagerPtr
@@ -2100,9 +2444,9 @@ def free_non_lstm_layer_expr(man,element,layerno):
         Returns
         -------
         None
-        
+
         """
-    
+
     try:
         free_non_lstm_layer_expr_c = fppoly_api.free_non_lstm_layer_expr
         free_non_lstm_layer_expr_c.restype = None

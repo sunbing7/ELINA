@@ -24,9 +24,9 @@ int main(int argc, char **argv) {
      *  output layer
      */
 
-    double weights_out[2][2] = {
-            {1, 0},
-            {-1, 1}
+    double weights_out[2][8] = {
+            {1, 0, 0, 0, 0, 0, 0, 0},
+            {-1, 1, 0, 0, 0, 0, 0, 0}
     };
     double bias_out[2] = {0, -2};
 
@@ -36,7 +36,9 @@ int main(int argc, char **argv) {
         weights_out_ptr[i] = &(weights_out[i]);
     }
 
-    size_t predecessor_out[1] = {2};
+    size_t expr_dim_op[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    size_t predecessor_out[1] = {3};
 
     size_t input_size_out = 2;
     size_t output_size_out = 2;
@@ -186,7 +188,7 @@ int main(int argc, char **argv) {
 
     size_t lexpr_size[8] = {8, 8, 8, 8, 8, 8, 8, 8};
 
-    size_t predecessor[1] = {};
+    size_t predecessor[1] = {-1};
 
 
 
@@ -195,14 +197,14 @@ int main(int argc, char **argv) {
     element = fppoly_from_network_input_poly(man, 0, 8, inf, sup,
                                              lpp, lexpr_cst, lexpr_dim, upp,
                                              uexpr_cst, uexpr_dim, lexpr_size[0]);
-    ffn_handle_first_relu_layer_(man, element, weights_l1_ptr, bias_l1, expr_dim_l1_ptr, output_size_l1, 8, predecessor);
+    ffn_handle_first_relu_layer_(man, element, weights_l1_ptr, bias_l1, expr_dim_l1_ptr, 2, 8, predecessor);
 
 
-    ffn_handle_intermediate_relu_layer_(man, element, weights_l2_ptr, bias_l2, expr_dim_l2_ptr, output_size_l1, 8, predecessor_l1, true);
+    ffn_handle_intermediate_relu_layer_(man, element, weights_l2_ptr, bias_l2, expr_dim_l2_ptr, 2, 8, predecessor_l1, true);
 
-    ffn_handle_intermediate_relu_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, output_size_l1, 8, predecessor_l2, true);
+    ffn_handle_intermediate_relu_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, 2, 8, predecessor_l2, true);
 
-    ffn_handle_last_relu_layer(man, element, weights_out_ptr, bias_out,  input_size_out, output_size_out, predecessor_out, true, true);
+    ffn_handle_last_relu_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
 
     // for debug purpose only
     ffn_handle_intermediate_relu_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, output_size_l1, 8, predecessor_l2, true);
