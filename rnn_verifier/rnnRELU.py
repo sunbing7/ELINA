@@ -1,3 +1,7 @@
+import sys
+
+sys.path.insert(0, '/Users/bing.sun/workspace/elina_git/ELINA/python_interface/')
+
 import numpy as np
 from fppoly import *
 from elina_abstract0 import *
@@ -9,9 +13,7 @@ from utils import *
 
 from read_net_file import *
 import re
-import sys
 
-sys.path.insert(0, '/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/')
 
 libc = CDLL(find_library('c'))
 cstdout = c_void_p.in_dll(libc, '__stdoutp')
