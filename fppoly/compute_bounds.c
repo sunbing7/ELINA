@@ -176,6 +176,15 @@ double compute_lb_from_expr(fppoly_internal_t *pr, expr_t * expr, fppoly_t * fp,
 		else{
 			k = expr->dim[i];
 		}
+#if HAS_RNN
+        if (expr->type == SPARSE && (layerno != -1)) {
+            if ((k + 1) > fp->layers[layerno]->dims) {
+                tmp1 = expr->inf_coeff[i];
+                res_inf = res_inf + tmp1;
+                continue;
+            }
+        }
+#endif
 			if(layerno==-1){
 				elina_double_interval_mul(&tmp1,&tmp2,expr->inf_coeff[i],expr->sup_coeff[i],fp->input_inf[k],fp->input_sup[k]);
 			}
@@ -245,7 +254,11 @@ double get_lb_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 			
 		    if(fp->layers[k]->activation==RELU){
 		        tmp_l = lexpr;
+#if HAS_RNN
+                lexpr = lexpr_replace_relu_bounds_(pr, lexpr, aux_neurons, fp->layers[k]->dims, use_area_heuristic);
+#else
 		        lexpr = lexpr_replace_relu_bounds(pr,lexpr,aux_neurons, use_area_heuristic);
+#endif
 		        free_expr(tmp_l);
 		    }
 		    else if(fp->layers[k]->activation==SIGMOID){

@@ -2156,6 +2156,41 @@ def box_for_neuron(man, element, layerno, neuron_no):
 
     return interval
 
+# HAS_RNN
+def lb_for_neuron(man, element, layerno, neuron_no):
+    """
+    returns bounds for a neuron in a layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    layerno: c_size_t
+        the layer number
+    neuron_no: c_size_t
+        the neuron number in the layer
+    Returns
+    -------
+    interval_array : ElinaIntervalPtr
+        ElinaIntervalArray representing the hypercube.
+
+    """
+
+    interval = None
+    try:
+        lb_for_neuron_c = fppoly_api.lb_for_neuron
+        lb_for_neuron_c.restype = c_double
+        lb_for_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t]
+        lb = lb_for_neuron_c(man, element, layerno, neuron_no)
+    except:
+        print('Problem with loading/calling "lb_for_neuron" from "fppoly.so"')
+        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t, c_size_t to the function')
+
+    return lb
+
+
 
 def box_for_layer(man, element, layerno):
     """
