@@ -3,11 +3,13 @@
 //
 #include <stdio.h>
 #include "fppoly.h"
+#include "lstm_approx.c"
 #if HAS_RNN
 #define HAS_DEEPPOLY_EXAMPLE    0
 #define HAS_FPPOLY_PY_EXAMPLE   0
 #define HAS_RNN_EXAMPLE         0
-#define HAS_RNN_DEMO            1
+#define HAS_RNN_DEMO            0
+#define HAS_LSTM_DEMO           1
 #endif
 
 int main(int argc, char **argv) {
@@ -15,7 +17,278 @@ int main(int argc, char **argv) {
     elina_manager_t *man;
     size_t input_size;
     man = fppoly_manager_alloc();
+#if HAS_LSTM_DEMO
 
+#define Their_test  1
+
+#if Their_test
+    /*
+  * input
+  */
+
+    uint32_t timestep = 3;
+
+    double inf[3] = {0.0, 0.2, 0.1};
+    double sup[3] = {0.0, 0.2, 0.1};
+    double lpp[3][3] = {{1, 0, 0},
+                        {0, 1, 0},
+                        {0, 0, 1}
+    };
+    double upp[3][3] = {{1, 0, 0},
+                        {0, 1, 0},
+                        {0, 0, 1}
+    };
+
+    double lexpr_cst[3] = {0.0, 0.0, 0.0};
+    double uexpr_cst[3] = {0.0, 0.0, 0.0};
+
+    size_t lexpr_dim[3][3] = {{0, 1, 2},
+                              {0, 1, 2},
+                              {0, 1, 2}
+    };
+    size_t uexpr_dim[3][3] = {{0, 1, 2},
+                              {0, 1, 2},
+                              {0, 1, 2}
+    };
+    size_t lexpr_size[3] = {3, 3, 3};
+
+    size_t predecessor[1] = {-1};
+
+
+
+
+
+    double W_i[3] = {0.25, 0, 0.5};
+    double W_c[3] = {0.4, 0, 0.3};
+    double W_f[3] = {0.06, 0, 0.03};
+    double W_o[3] = {0.04, 0, 0.02};
+
+
+    double * weights_ptr[4];
+
+    {
+        weights_ptr[0] = &(W_i[0]);
+        weights_ptr[1] = &(W_c[0]);
+        weights_ptr[2] = &(W_f[0]);
+        weights_ptr[3] = &(W_o[0]);
+    }
+
+    /*
+     * layer 2
+     */
+
+    double W_f2[3] = {0.06, 0.03, 0.0};
+
+
+    double W_i2[3] = {0.25, 0.5, 0.0};
+
+
+    double W_c2[3] = {0.4, 0.3, 0.0};
+
+
+    double W_o2[3] = {0.04, 0.02, 0.0};
+
+
+    double * weights_ptr2[4];
+
+    {
+        weights_ptr2[0] = &(W_i2[0]);
+        weights_ptr2[1] = &(W_c2[0]);
+        weights_ptr2[2] = &(W_f2[0]);
+        weights_ptr2[3] = &(W_o2[0]);
+    }
+
+    double bias[4] = {0.01, 0.05, 0.002, 0.001};
+    double ip_bias[3] = {0.0, 0.0, 0.0};
+
+    double * in_ptr[3];
+    for (int i = 0; i < 3; i++) {
+        in_ptr[i] = &(upp[i]);
+    }
+
+    double weight_op = 0.6;
+    double bias_op = 0.025;
+
+    double * weights_ptr_op[2];
+    weights_ptr_op[0] = &weight_op;
+
+    size_t predecessor_l1[1] = {1};
+    size_t predecessor_l2[1] = {2};
+    size_t predecessor_o[1] = {3};
+
+    element = fppoly_from_network_input_poly(man, 0, 3, inf, sup,
+                                             lpp, lexpr_cst, lexpr_dim, upp,
+                                             uexpr_cst, uexpr_dim, lexpr_size[0]);
+
+    //create_lstm_layer(man, element, 2, predecessor);
+    ffn_handle_first_mul_layer_(man, element, in_ptr, ip_bias, lexpr_dim,  3, predecessor);
+
+    //handle_lstm_layer_(man, element, weights_ptr,  bias, 8, 2, lexpr_dim, predecessor_l1, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr, bias, lexpr_dim, 3, 1, predecessor_l1, true);
+
+    lstm_handle_intermediate_layer_(man, element, weights_ptr2, bias, lexpr_dim, 3, 1, predecessor_l2, true);
+
+    lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, lexpr_dim, 1, 1, predecessor_o, true);
+    //for debug only
+    handle_lstm_layer_(man, element, weights_ptr,  bias, lexpr_dim, 3, 1, predecessor_l1, true);
+#else
+    /*
+      * input
+      */
+
+    uint32_t timestep = 3;
+
+    double inf[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double sup[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double lpp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 1, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 1, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 1, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 1},
+    };
+    double upp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 1, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 1, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 1, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 1},
+    };
+
+    double lexpr_cst[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double uexpr_cst[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    size_t lexpr_dim[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7}
+    };
+    size_t uexpr_dim[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7}
+    };
+
+    size_t lexpr_size[8] = {8, 8, 8, 8, 8, 8, 8, 8};
+
+    size_t predecessor[1] = {-1};
+
+    /*
+     * W_f, W_i, W_c, W_o
+     */
+
+    double W_f[2][8] = {{0.1, -0.1, 0, 0, 0, 0, 1, 1},
+                        {-0.1, 0.1, 0, 0, 0, 0, 1, -1}};
+
+    double b_f[2] = {0, 0};
+
+    double W_i[2][8] = {{0.1, -0.1, 0, 0, 0, 0, 1, 1},
+                        {-0.1, 0.1, 0, 0, 0, 0, 1, -1}};
+
+    double b_i[2] = {0, 0};
+
+    double W_c[2][8] = {{0.1, -0.1, 0, 0, 0, 0, 1, 1},
+                        {-0.1, 0.1, 0, 0, 0, 0, 1, -1}};
+    double b_c[2] = {0, 0};
+
+    double W_o[2][8] = {{0.1, -0.1, 0, 0, 0, 0, 1, 1},
+                        {-0.1, 0.1, 0, 0, 0, 0, 1, -1}};
+
+    double b_o[2] = {0, 0};
+
+    double * weights_ptr[8];
+
+    for (int i = 0; i < 2; i++) {
+        weights_ptr[i] = &(W_i[i]);
+        weights_ptr[i + 2] = &(W_c[i]);
+        weights_ptr[i + 4] = &(W_f[i]);
+        weights_ptr[i + 6] = &(W_o[i]);
+    }
+
+    /*
+     * layer 2
+     */
+
+    /*
+     * W_f, W_i, W_c, W_o
+     */
+        double W_f2[2][8] = {{0.1, -0.1, 0, 0, 1, 1, 0, 0},
+                        {-0.1, 0.1, 0, 0, 1, -1, 0, 0}};
+
+
+    double W_i2[2][8] = {{0.1, -0.1, 0, 0, 1, 1, 0, 0},
+                         {-0.1, 0.1, 0, 0, 1, -1, 0, 0}};
+
+
+    double W_c2[2][8] = {{0.1, -0.1, 0, 0, 1, 1, 0, 0},
+                         {-0.1, 0.1, 0, 0, 1, -1, 0, 0}};
+
+
+    double W_o2[2][8] = {{0.1, -0.1, 0, 0, 1, 1, 0, 0},
+                         {-0.1, 0.1, 0, 0, 1, -1, 0, 0}};
+
+
+    double * weights_ptr2[8];
+
+    for (int i = 0; i < 2; i++) {
+        weights_ptr2[i] = &(W_f2[i]);
+        weights_ptr2[i + 2] = &(W_f2[i]);
+        weights_ptr2[i + 4] = &(W_f2[i]);
+        weights_ptr2[i + 6] = &(W_f2[i]);
+    }
+
+
+    double bias[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double ip_bias[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    double * in_ptr[8];
+    for (int i = 0; i < 8; i++) {
+        in_ptr[i] = &(upp[i]);
+    }
+
+    size_t predecessor_l1[1] = {1};
+    size_t predecessor_l2[1] = {2};
+
+
+    element = fppoly_from_network_input_poly(man, 0, 8, inf, sup,
+                                             lpp, lexpr_cst, lexpr_dim, upp,
+                                             uexpr_cst, uexpr_dim, lexpr_size[0]);
+
+    //create_lstm_layer(man, element, 2, predecessor);
+    ffn_handle_first_mul_layer_(man, element, in_ptr, ip_bias, lexpr_dim,  8, predecessor);
+
+    //handle_lstm_layer_(man, element, weights_ptr,  bias, 8, 2, lexpr_dim, predecessor_l1, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr, bias, lexpr_dim, 8, 2, predecessor_l1, true);
+
+    lstm_handle_intermediate_layer_(man, element, weights_ptr2, bias, lexpr_dim, 8, 2, predecessor_l2, true);
+
+    handle_lstm_layer_(man, element, weights_ptr,  bias, lexpr_dim, 8, 2, predecessor_l1, true);
+#endif
+
+
+#if 0
+    ffn_handle_first_relu_layer_(man, element, weights_l1_ptr, bias_l1, expr_dim_l1_ptr, 2, 8, predecessor);
+
+
+    ffn_handle_intermediate_relu_layer_(man, element, weights_l2_ptr, bias_l2, expr_dim_l2_ptr, 2, 8, predecessor_l1, true);
+
+    ffn_handle_intermediate_relu_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, 2, 8, predecessor_l2, true);
+
+    ffn_handle_last_relu_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
+#endif
+#endif  /* HAS_LSTM_DEMO */
 #if HAS_RNN_DEMO
     /*
      *
@@ -199,6 +472,14 @@ int main(int argc, char **argv) {
 
     ffn_handle_last_relu_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 11, predecessor_out, false, true);
 
+    //get bounds
+    elina_linexpr0_t * lexpr = get_lexpr_for_output_neuron(man, element, 0);
+    elina_linexpr0_t * uexpr = get_uexpr_for_output_neuron(man, element, 0);
+
+    if (lexpr->size != uexpr->size) {
+        lexpr = get_lexpr_for_output_neuron(man, element, 1);
+        uexpr = get_uexpr_for_output_neuron(man, element, 1);
+    }
     //compare class
     bool result = false;
     result = is_greater_(man, element, 1, 0, (2 + 9), true);
@@ -214,7 +495,7 @@ int main(int argc, char **argv) {
     }
     //ffn_handle_first_relu_layer(man, element, test_weights, bias,   input_size, input_size, predecessor);
 
-#
+
 #endif
 #if HAS_RNN_EXAMPLE
     /*
@@ -426,7 +707,29 @@ int main(int argc, char **argv) {
 
     ffn_handle_last_relu_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
 
+    //get bounds
+    expr_t * lexpr = get_lexpr_for_output_neuron_simple(man, element, 0);
+    expr_t * uexpr = get_uexpr_for_output_neuron_simple(man, element, 0);
+
+    if (lexpr->size == uexpr->size) {
+        lexpr = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexpr = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
+
+    if (lexpr->size == uexpr->size) {
+        lexpr = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexpr = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
+
     ffn_handle_last_relu_layer_(man, element, weights_l_ptr, bias_l, expr_dim_op, 2, 8, predecessor_l, false, true);
+
+    expr_t * lexprY = get_lexpr_for_output_neuron_simple(man, element, 0);
+    expr_t * uexprY = get_uexpr_for_output_neuron_simple(man, element, 0);
+
+    if (lexprY->size == uexprY->size) {
+        lexprY = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexprY = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
 
     double out_lb, out_last;
     out_lb =  lb_for_neuron(man, element, 4, 0);

@@ -57,6 +57,10 @@ expr_t * copy_expr(expr_t *src);
 
 expr_t* concretize_dense_sub_expr(fppoly_internal_t *pr, expr_t * expr, double *inf, double *sup, size_t start, size_t size);
 
+#if HAS_RNN
+expr_t* concretize_sparse_sub_expr(fppoly_internal_t *pr, expr_t * expr, double *inf, double *sup, size_t * dim, size_t start, size_t size);
+#endif
+
 void merge_sparse_expr(expr_t *expr, size_t l, size_t m, size_t r);
 
 void merge_sort_sparse_expr(expr_t *expr, size_t l, size_t r);

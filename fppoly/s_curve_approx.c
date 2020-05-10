@@ -422,7 +422,127 @@ void compute_slope_and_intercept_s_curve_uexpr(fppoly_internal_t * pr, double * 
 
 }
 
+#if HAS_RNN
+expr_t * lexpr_replace_s_curve_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool is_sigmoid){
+    size_t num_neurons = expr->size;
+    size_t i,k;
+    expr_t * res = alloc_expr();
+    res->inf_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->sup_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->inf_cst = expr->inf_cst;
+    res->sup_cst = expr->sup_cst;
+    res->type = expr->type;
+    res->size = num_neurons;
 
+    for(i = 0; i < num_neurons; i++){
+        if(expr->type==DENSE){
+            k = i;
+        }
+        else{
+            k = expr->dim[i];
+        }
+
+        if (expr->type == SPARSE) {
+            if ((k + 1) > aux_neuron_len) {
+                res->inf_coeff[i] = expr->inf_coeff[i];
+                res->sup_coeff[i] = expr->sup_coeff[i];
+                continue;
+            }
+        }
+
+        neuron_t *neuron_k = neurons[k];
+        double lb = neurons[k]->lb;
+        double ub = neurons[k]->ub;
+        //if(expr->sup_coeff[i]<0 || expr->inf_coeff[i] < 0){
+        double slope_inf, slope_sup;
+        double intercept_inf, intercept_sup;
+        double mul_inf, mul_sup;
+        bool boxify = false;
+        compute_slope_and_intercept_s_curve_lexpr(pr, &slope_inf, &slope_sup,
+                                                  &intercept_inf, &intercept_sup, expr->inf_coeff[i],
+                                                  expr->sup_coeff[i], lb, ub, is_sigmoid, &boxify);
+        if(boxify){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            res->inf_cst = res->inf_cst + intercept_inf;
+            res->sup_cst = res->sup_cst + intercept_sup;
+        }
+        else{
+            elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],slope_inf,slope_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            elina_double_interval_mul_cst_coeff(pr, &mul_inf, &mul_sup, intercept_inf, intercept_sup, expr->inf_coeff[i], expr->sup_coeff[i] );
+            elina_double_interval_add_cst_coeff(pr,&res->inf_cst,&res->sup_cst,mul_inf, mul_sup, res->inf_cst, res->sup_cst);
+        }
+
+
+    }
+    if(expr->type==SPARSE){
+        res->dim = (size_t*)malloc(num_neurons*sizeof(size_t));
+        for(i=0; i < num_neurons; i++){
+            res->dim[i] = expr->dim[i];
+        }
+    }
+    return res;
+}
+
+expr_t * uexpr_replace_s_curve_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len, bool is_sigmoid){
+    size_t num_neurons = expr->size;
+    size_t i,k;
+    expr_t * res = alloc_expr();
+    res->inf_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->sup_coeff = (double *)malloc(num_neurons*sizeof(double));
+    res->inf_cst = expr->inf_cst;
+    res->sup_cst = expr->sup_cst;
+    res->type = expr->type;
+    res->size = num_neurons;
+
+    for(i = 0; i < num_neurons; i++){
+        if(expr->type==DENSE){
+            k = i;
+        }
+        else{
+            k = expr->dim[i];
+        }
+
+        if (expr->type == SPARSE) {
+            if ((k + 1) > aux_neuron_len) {
+                res->inf_coeff[i] = expr->inf_coeff[i];
+                res->sup_coeff[i] = expr->sup_coeff[i];
+                continue;
+            }
+        }
+
+        neuron_t *neuron_k = neurons[k];
+        double lb = neurons[k]->lb;
+        double ub = neurons[k]->ub;
+        double slope_inf, slope_sup;
+        double intercept_inf, intercept_sup;
+        double mul_inf, mul_sup;
+        bool boxify = false;
+        compute_slope_and_intercept_s_curve_uexpr(pr, &slope_inf, &slope_sup,
+                                                  &intercept_inf, &intercept_sup, expr->inf_coeff[i],
+                                                  expr->sup_coeff[i], lb, ub, is_sigmoid, &boxify);
+        if(boxify){
+            res->inf_coeff[i] = 0.0;
+            res->sup_coeff[i] = 0.0;
+            res->inf_cst = res->inf_cst + intercept_inf;
+            res->sup_cst = res->sup_cst + intercept_sup;
+        }
+        else{
+            elina_double_interval_mul_expr_coeff(pr,&res->inf_coeff[i],&res->sup_coeff[i],slope_inf,slope_sup,expr->inf_coeff[i],expr->sup_coeff[i]);
+            elina_double_interval_mul_cst_coeff(pr, &mul_inf, &mul_sup, intercept_inf, intercept_sup, expr->inf_coeff[i], expr->sup_coeff[i] );
+            elina_double_interval_add_cst_coeff(pr,&res->inf_cst,&res->sup_cst,mul_inf, mul_sup, res->inf_cst, res->sup_cst);
+        }
+    }
+    if(expr->type==SPARSE){
+        res->dim = (size_t*)malloc(num_neurons*sizeof(size_t));
+        for(i=0; i < num_neurons; i++){
+            res->dim[i] = expr->dim[i];
+        }
+    }
+    return res;
+}
+
+#endif
 expr_t * lexpr_replace_s_curve_bounds(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, bool is_sigmoid){
 	size_t num_neurons = expr->size;
 	size_t i,k;
@@ -523,7 +643,23 @@ expr_t * uexpr_replace_s_curve_bounds(fppoly_internal_t *pr, expr_t * expr, neur
     }
     return res;
 }
+#if HAS_RNN
+expr_t * uexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
+    return uexpr_replace_s_curve_bounds_(pr, expr, neurons, aux_neuron_len, true);
+}
 
+expr_t * uexpr_replace_tanh_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
+    return uexpr_replace_s_curve_bounds_(pr, expr, neurons, false, aux_neuron_len);
+}
+
+expr_t * lexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
+    return lexpr_replace_s_curve_bounds_(pr, expr, neurons, aux_neuron_len, true);
+}
+
+expr_t * lexpr_replace_tanh_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
+    return lexpr_replace_s_curve_bounds_(pr, expr, neurons, aux_neuron_len, false);
+}
+#endif
 
 expr_t * uexpr_replace_sigmoid_bounds(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons){
     return uexpr_replace_s_curve_bounds(pr, expr, neurons, true);

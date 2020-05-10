@@ -28,7 +28,15 @@ extern "C" {
 #endif
 
 #include "backsubstitute.h"
+#if HAS_RNN //
+expr_t * uexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len);
 
+expr_t * lexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len);
+
+expr_t * lexpr_replace_tanh_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len);
+
+expr_t * uexpr_replace_tanh_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len);
+#endif
 expr_t * uexpr_replace_sigmoid_bounds(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons);
 
 expr_t * lexpr_replace_sigmoid_bounds(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons);

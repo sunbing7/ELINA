@@ -58,9 +58,15 @@ void update_state_using_predecessor_layer(fppoly_internal_t *pr,fppoly_t *fp, ex
 	else if(fp->layers[k]->type==MAXPOOL || fp->layers[k]->type==LSTM){
 		expr_t * tmp_l = lexpr;
 		expr_t * tmp_u = uexpr;
+#if HAS_LSTM
+		*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]);
+
+		*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]);
+#else
 		*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds(pr,lexpr,aux_neurons);
 				
 		*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds(pr,uexpr,aux_neurons);
+#endif
 		free_expr(tmp_l);
 				
 		free_expr(tmp_u);
@@ -264,7 +270,7 @@ void * update_state_using_previous_layers(void *args){
 
 void update_state_using_previous_layers_parallel(elina_manager_t *man, fppoly_t *fp, size_t layerno, bool use_area_heuristic){
 	//size_t NUM_THREADS = get_nprocs();
-  size_t NUM_THREADS =  sysconf(_SC_NPROCESSORS_ONLN);
+  size_t NUM_THREADS =  1;//sysconf(_SC_NPROCESSORS_ONLN);
 	nn_thread_t args[NUM_THREADS];
 	pthread_t threads[NUM_THREADS];
 	size_t num_out_neurons = fp->layers[layerno]->dims;

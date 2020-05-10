@@ -44,7 +44,8 @@ extern "C" {
 #include "elina_box_meetjoin.h"
 
 // sunbing: add vanilla RNN support
-#define HAS_RNN	1
+#define HAS_RNN	    1
+
 
 typedef struct fppoly_internal_t{
   /* Name of function */
@@ -88,6 +89,7 @@ typedef enum fnn_op{
 	MUL,
 #if HAS_RNN
 	MATMUL_RNN,
+	MUL_LSTM
 #endif
 }fnn_op;
 
@@ -185,7 +187,9 @@ void ffn_handle_first_parabola_layer(elina_manager_t* man, elina_abstract0_t * a
 void ffn_handle_first_log_layer(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias,  size_t size, size_t num_pixels, size_t *predecessors);
 
 void ffn_handle_first_sub_layer(elina_manager_t* man, elina_abstract0_t * abs,  double *cst, bool is_minuend, size_t size, size_t *predecessors);
-
+#if HAS_RNN
+void ffn_handle_first_mul_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim,  size_t size, size_t *predecessors);
+#endif
 void ffn_handle_first_mul_layer(elina_manager_t* man, elina_abstract0_t * abs,  double *cst, size_t size, size_t *predecessors);    
 
 void ffn_handle_first_relu_layer_no_alloc(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias,  size_t size, size_t num_pixels, size_t *predecessors);
@@ -291,6 +295,8 @@ elina_linexpr0_t * get_uexpr_for_output_neuron(elina_manager_t *man, elina_abstr
 elina_interval_t * box_for_neuron(elina_manager_t* man, elina_abstract0_t * abs, size_t layerno, size_t neuron_no);
 
 #if HAS_RNN
+expr_t * get_lexpr_for_output_neuron_simple(elina_manager_t *man, elina_abstract0_t *abs, size_t i);
+expr_t * get_uexpr_for_output_neuron_simple(elina_manager_t *man, elina_abstract0_t *abs, size_t i);
 double lb_for_neuron(elina_manager_t* man, elina_abstract0_t * abs, size_t layerno, size_t neuron_no);
 #endif
 

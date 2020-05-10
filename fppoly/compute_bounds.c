@@ -263,16 +263,20 @@ double get_lb_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 		    }
 		    else if(fp->layers[k]->activation==SIGMOID){
 		        tmp_l = lexpr;
-			//printf("start\n");
-			//fflush(stdout);
+#if HAS_RNN
+				lexpr = lexpr_replace_sigmoid_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
+#else
 		        lexpr = lexpr_replace_sigmoid_bounds(pr,lexpr,aux_neurons);
-			//printf("finish\n");
-			//fflush(stdout);
+#endif
 		        free_expr(tmp_l);
 		    }
 		    else if(fp->layers[k]->activation==TANH){
 		         tmp_l = lexpr;
+#if HAS_RNN
+				lexpr = lexpr_replace_tanh_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
+#else
 		        lexpr = lexpr_replace_tanh_bounds(pr,lexpr,aux_neurons);
+#endif
 		        free_expr(tmp_l);
 		    }
 		
@@ -286,14 +290,18 @@ double get_lb_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 		        	lexpr = lexpr_replace_log_bounds(pr,lexpr,aux_neurons);
 		        	free_expr(tmp_l);
 			}	
-				tmp_l = lexpr;	
+				tmp_l = lexpr;
 				res = compute_lb_from_expr(pr,lexpr,fp,k);		
 				*lexpr_ptr = expr_from_previous_layer(pr,lexpr, fp->layers[k]);		
 				free_expr(tmp_l);
 			}
 		else{
 			expr_t * tmp_l = lexpr;
-			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds(pr,lexpr,aux_neurons);	
+#if HAS_LSTM
+			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]);
+#else
+			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds(pr,lexpr,aux_neurons);
+#endif
 			free_expr(tmp_l);
 		}
 		return res;
@@ -341,7 +349,11 @@ double get_ub_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 			}
 		else{
 			expr_t * tmp_u = uexpr;
-			*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds(pr,uexpr,aux_neurons);	
+#if HAS_LSTM
+			*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]);
+#else
+			*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds(pr,uexpr,aux_neurons);
+#endif
 			free_expr(tmp_u);
 		}
 		return res;

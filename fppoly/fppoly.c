@@ -283,7 +283,7 @@ void ffn_handle_first_layer_(elina_manager_t* man, elina_abstract0_t * abs, doub
     //fflush(stdout);
 
     if(alloc){
-        fppoly_alloc_first_layer(res,size, FFN, activation);
+        fppoly_alloc_first_layer(res, size, FFN, activation);
     }
     fppoly_internal_t *pr = fppoly_init_from_manager(man, ELINA_FUNID_ASSIGN_LINEXPR_ARRAY);
     size_t i, j;
@@ -309,7 +309,10 @@ void ffn_handle_first_layer_(elina_manager_t* man, elina_abstract0_t * abs, doub
             double coeff = 1;
             neuron->expr = create_sparse_expr(&coeff, -cst_i, &i, 1);
         } else if (OP == MATMUL_RNN) {
-            double * weight_i = weights[i];
+            double *weight_i = weights[i];
+            neuron->expr = create_sparse_expr(weight_i, cst_i, expr_dim, num_pixels);
+        } else if (OP == MUL_LSTM) {
+            double *weight_i = weights[i];
             neuron->expr = create_sparse_expr(weight_i, cst_i, expr_dim, num_pixels);
         }else{
             double * weight_i = weights[i];
@@ -381,7 +384,7 @@ void ffn_handle_first_layer(elina_manager_t* man, elina_abstract0_t * abs, doubl
 
 #if HAS_RNN
 void ffn_handle_first_relu_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim, size_t size, size_t num_pixels, size_t *predecessors){
-#if 1
+#if 0
     double weights_l1[2][8] = {
             {0.1, -0.1, 0, 0, 0, 0, 1.0, 1.0},
             {-0.1, 0.1, 0, 0, 0, 0, 1.0, -1.0}
@@ -435,7 +438,11 @@ void ffn_handle_first_sub_layer(elina_manager_t* man, elina_abstract0_t * abs,  
         	ffn_handle_first_layer(man, abs, NULL, cst, size, size, predecessors, NONE, true, SUB2);
 	}
 }
-
+#if HAS_RNN
+void ffn_handle_first_mul_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim,  size_t size, size_t *predecessors){
+    ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, size, predecessors, NONE, true, MATMUL_RNN);
+}
+#endif
 void ffn_handle_first_mul_layer(elina_manager_t* man, elina_abstract0_t * abs, double *bias,  size_t size, size_t *predecessors){
         ffn_handle_first_layer(man, abs, NULL, bias, size, size, predecessors, NONE, true, MUL);
 }
@@ -1757,6 +1764,32 @@ elina_linexpr0_t * get_expr_for_output_neuron(elina_manager_t *man, elina_abstra
 	return res;
 }
 
+#if HAS_RNN
+expr_t * get_expr_for_output_neuron_simple(elina_manager_t *man, elina_abstract0_t *abs, size_t i, bool is_lower){
+    fppoly_internal_t *pr = fppoly_init_from_manager(man, ELINA_FUNID_ASSIGN_LINEXPR_ARRAY);
+    fppoly_t *fp = fppoly_of_abstract0(abs);
+
+    size_t output_size = fp->layers[fp->numlayers-1]->dims;
+
+    if(i >= output_size){
+        return NULL;
+    }
+
+    size_t num_pixels = fp->num_pixels;
+    expr_t * expr = NULL;
+    if(is_lower){
+        expr = fp->out->lexpr[i];
+    }
+    else{
+        expr = fp->out->uexpr[i];
+    }
+    return expr;
+}
+
+
+
+#endif
+
 elina_linexpr0_t * get_lexpr_for_output_neuron(elina_manager_t *man,elina_abstract0_t *abs, size_t i){
 	return get_expr_for_output_neuron(man,abs,i, true);
 }
@@ -1764,6 +1797,21 @@ elina_linexpr0_t * get_lexpr_for_output_neuron(elina_manager_t *man,elina_abstra
 elina_linexpr0_t * get_uexpr_for_output_neuron(elina_manager_t *man,elina_abstract0_t *abs, size_t i){
 	return get_expr_for_output_neuron(man,abs,i, false);
 }
+
+#if HAS_RNN
+/*
+ * return array of output neuron expr
+ */
+expr_t * get_lexpr_for_output_neuron_simple(elina_manager_t *man, elina_abstract0_t *abs, size_t i){
+    return get_expr_for_output_neuron_simple(man,abs,i, true);
+}
+
+expr_t * get_uexpr_for_output_neuron_simple(elina_manager_t *man, elina_abstract0_t *abs, size_t i){
+    return get_expr_for_output_neuron_simple(man,abs,i, false);
+}
+
+
+#endif
 
 void update_bounds_for_neuron(elina_manager_t *man, elina_abstract0_t *abs, size_t layerno, size_t neuron_no, double lb, double ub){
 	fppoly_t *fp = fppoly_of_abstract0(abs);

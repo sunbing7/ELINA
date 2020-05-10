@@ -210,6 +210,34 @@ expr_t* concretize_dense_sub_expr(fppoly_internal_t *pr, expr_t * expr, double *
 	return res;
 }
 
+#if HAS_RNN
+expr_t* concretize_sparse_sub_expr(fppoly_internal_t *pr, expr_t * expr, double *inf, double *sup, size_t * dim, size_t start, size_t size){
+    expr_t * res = (expr_t *)malloc(sizeof(expr_t));
+    res->inf_coeff = (double *)malloc(start*sizeof(double));
+    res->sup_coeff = (double *)malloc(start*sizeof(double));
+    size_t i;
+    res->inf_cst = expr->inf_cst;
+    res->sup_cst = expr->sup_cst;
+    res->type = expr->type;
+    for(i=0; i < start; i++){
+        res->inf_coeff[i] = expr->inf_coeff[i];
+        res->sup_coeff[i] = expr->sup_coeff[i];
+    }
+    for(i=start; i< size;i++){
+        double tmp1,tmp2;
+        elina_double_interval_mul_expr_coeff(pr,&tmp1,&tmp2,inf[i-start],sup[i-start],expr->inf_coeff[i],expr->sup_coeff[i]);
+        res->inf_cst += tmp1;
+        res->sup_cst += tmp2;
+    }
+    res->size = start;
+
+    res->dim = (size_t *)malloc(expr->size*sizeof(size_t));
+    for(i=0; i < expr->size; i++){
+        res->dim[i] = expr->dim[i];
+    }
+    return res;
+}
+#endif
 
 void merge_sparse_expr(expr_t *expr, size_t l, size_t m, size_t r) {
     int i, j, k;
