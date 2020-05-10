@@ -28,6 +28,8 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 import ctypes
 
+from fppoly_h import *
+
 _doublepp = ndpointer(dtype=np.uintp, ndim=1, flags='C')
 
 
@@ -1870,6 +1872,38 @@ def is_greater(man, element, y, x, use_area_heuristic):
         print(inst)
     return res
 
+#rnn
+def rnn_is_greater(man, element, y, x, dim, use_area_heuristic):
+    """
+     Check if y is strictly greater than x in the abstract element
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    destructive : c_bool
+        Boolean flag.
+    y : ElinaDim
+        The dimension y in the constraint y-x>0.
+    x: ElinaDim
+	The dimension x in the constraint y-x>0.
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    res = boolean
+
+    """
+    res = None
+    try:
+        is_greater_c = fppoly_api.is_greater_
+        is_greater_c.restype = c_bool
+        is_greater_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, ElinaDim, c_size_t, ElinaDim, c_bool]
+        res = is_greater_c(man, element, y, x, dim, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_is_greater" from "libfppoly.so"')
+        print(inst)
+    return res
 
 def conv_handle_first_layer(man, element, filter_weights, filter_bias, input_size, filter_size, num_filters, strides,
                             output_size, pad_top, pad_left, has_bias, predecessors):
@@ -2393,6 +2427,83 @@ def get_uexpr_for_output_neuron(man, element, i):
     return linexpr0
 
 
+# rnn
+def get_lexpr_for_output_neuron_simple(man, element, i):
+    """
+    returns lower polyhedra constraint for the i-th output neuron in terms of the input neurons
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    i: c_size_t
+        output neuron number
+
+    Returns
+    -------
+    expr :     ElinaLinexpr0Ptr
+        The lower polyhedra expression for the output neuron in terms of input parameters and pixels
+
+    """
+
+    linexpr0 = None
+    try:
+        get_lexpr_for_output_neuron_c = fppoly_api.get_lexpr_for_output_neuron_simple
+        get_lexpr_for_output_neuron_c.restype = FppolyExprtPtr
+        get_lexpr_for_output_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
+        linexpr0 = get_lexpr_for_output_neuron_c(man, element, i)
+
+        #debug
+        '''
+        print('constant:')
+        print(linexpr0[0].sup_cst)
+        print('coefficients:')
+        for i in range (0, linexpr0[0].size):
+            print('dim[{}]: {}'.format(linexpr0[0].dim[i], linexpr0[0].sup_coeff[i]))
+        '''
+    except:
+        print('Problem with loading/calling "get_lexpr_for_output_neuron_simple" from "fppoly.so"')
+        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
+
+    return linexpr0
+
+# rnn
+def get_uexpr_for_output_neuron_simple(man, element, i):
+    """
+    returns lower polyhedra constraint for the i-th output neuron in terms of the input neurons
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    i: c_size_t
+        output neuron number
+
+    Returns
+    -------
+    expr :     ElinaLinexpr0Ptr
+        The upper polyhedra expression for the output neuron in terms of input parameters and pixels
+
+    """
+
+    linexpr0 = None
+    try:
+        get_uexpr_for_output_neuron_c = fppoly_api.get_uexpr_for_output_neuron_simple
+        get_uexpr_for_output_neuron_c.restype = FppolyExprtPtr
+        get_uexpr_for_output_neuron_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t]
+        linexpr0 = get_uexpr_for_output_neuron_c(man, element, i)
+    except:
+        print('Problem with loading/calling "get_uexpr_for_output_neuron_simple" from "fppoly.so"')
+        print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
+
+    return linexpr0
+
+
+
 def create_lstm_layer(man, element, h, predecessors):
     """
     creates an lstm layer for the neural network, this should be called only once per each lstm layer
@@ -2491,3 +2602,159 @@ def free_non_lstm_layer_expr(man, element, layerno):
         print('Problem with loading/calling "free_non_lstm_layer_expr" from "fppoly.so"')
         print('Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, c_size_t to the function')
 
+# added sunbing
+
+def lstm_handle_first_layer_(man, element, weights, cst, dim, size, predecessors):
+    """
+    handle the first FFN log layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    cst : POINTER(c_double)
+        The cst vector
+    size: c_size_t
+	Number of neurons in the first layer
+    predecessors:
+        the layers before the current layer
+    Returns
+    -------
+    res : None
+
+    """
+
+    try:
+        ffn_handle_first_mul_layer_c = fppoly_api.ffn_handle_first_mul_layer_
+        ffn_handle_first_mul_layer_c.restype = None
+        ffn_handle_first_mul_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), POINTER(c_size_t),
+                                                 c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_mul_layer_c(man, element, weights, cst, dim, size, predecessors)
+    except Exception as inst:
+        print('Problem with loading/calling "lstm_handle_first_layer_" from "libfppoly.so"')
+        print(inst)
+
+    return
+
+
+def lstm_handle_intermediate_layer_(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic):
+    """
+    computes the hidden states and output vectors of the lstm unit, to be called at each time step after creating an LSTM unit
+
+    Parameters
+    -----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix of size 4*h \times d+h, with h rows each for f_t, i_t, o_t, and c_t in order,
+        columnwise the first d entries correspond to x_t and the remaining correspond to h_t
+    bias : POINTER(c_double)
+        The bias vector of size 4*h, in the same format as weights
+    d: c_size_t
+       size of x_t
+    h: c_size_t
+       size of h_t
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    --------
+    None
+    """
+    try:
+        handle_lstm_layer_c = fppoly_api.fppoly_handle_intermediate_lstm_layer_
+        handle_lstm_layer_c.restype = None
+        handle_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),
+                                        POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
+        handle_lstm_layer_c(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic)
+    except:
+        print('Problem with loading/calling "lstm_handle_intermediate_layer_" from "fppoly.so"')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, c_bool to the function')
+
+    return
+'''
+def lstm_handle_intermediate_layer_2(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic):
+    """
+    computes the hidden states and output vectors of the lstm unit, to be called at each time step after creating an LSTM unit
+
+    Parameters
+    -----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix of size 4*h \times d+h, with h rows each for f_t, i_t, o_t, and c_t in order,
+        columnwise the first d entries correspond to x_t and the remaining correspond to h_t
+    bias : POINTER(c_double)
+        The bias vector of size 4*h, in the same format as weights
+    d: c_size_t
+       size of x_t
+    h: c_size_t
+       size of h_t
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    --------
+    None
+    """
+    try:
+        handle_lstm_layer_c = fppoly_api.fppoly_handle_intermediate_lstm_layer_2
+        handle_lstm_layer_c.restype = None
+        handle_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),
+                                        POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
+        handle_lstm_layer_c(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic)
+    except:
+        print('Problem with loading/calling "lstm_handle_intermediate_layer_" from "fppoly.so"')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, c_bool to the function')
+
+    return
+'''
+
+def lstm_handle_last_layer_(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic):
+    """
+    computes the hidden states and output vectors of the lstm unit, to be called at each time step after creating an LSTM unit
+
+    Parameters
+    -----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix of size 4*h \times d+h, with h rows each for f_t, i_t, o_t, and c_t in order,
+        columnwise the first d entries correspond to x_t and the remaining correspond to h_t
+    bias : POINTER(c_double)
+        The bias vector of size 4*h, in the same format as weights
+    d: c_size_t
+       size of x_t
+    h: c_size_t
+       size of h_t
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    --------
+    None
+    """
+    try:
+        handle_lstm_layer_c = fppoly_api.fppoly_handle_last_lstm_layer_
+        handle_lstm_layer_c.restype = None
+        handle_lstm_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double),
+                                        POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t), c_bool]
+        handle_lstm_layer_c(man, element, weights, bias, dim, d, h, predecessors, use_area_heuristic)
+    except:
+        print('Problem with loading/calling "lstm_handle_last_layer_" from "fppoly.so"')
+        print(
+            'Make sure you are passing ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp, ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, c_bool to the function')
+
+    return

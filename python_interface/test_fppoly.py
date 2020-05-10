@@ -9,7 +9,23 @@ from ctypes.util import *
 libc = CDLL(find_library('c'))
 cstdout = c_void_p.in_dll(libc, '__stdoutp')
 
+def reorganize_output(input, hidden_size, timestep, step_size, out_size):
+    output = []
 
+    for op_idx in range (0, out_size):
+        input_i = input[op_idx]
+        output_i = []
+
+        for i in range (0, hidden_size):
+            output_i.append(input_i[i])
+        for i in range (timestep, 0, -1):
+            index = (i - 1) * step_size
+            for j in range(0, step_size):
+                output_i.append(input_i[index + j + hidden_size])
+        output_i.append(input_i[hidden_size + timestep * step_size])
+        output.append(output_i)
+
+    return output
 #debug
 
 net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnRELU_generated.pyt"
@@ -186,6 +202,44 @@ rnn_handle_last_relu_layer(man, element, weights_op, bias_op, dim_op, 3, dimensi
 #rnn_handle_last_relu_layer(man, element, weights_op, bias_op, dim_op, 3, dimension, pre_l, False, True)
 # compare output class
 
+l_outneuron_coef = []
+u_outneuron_coef = []
+
+for op_idx in range (0, output_size):
+    l_i = []
+    u_i = []
+    lexpr = get_lexpr_for_output_neuron_simple(man, element, op_idx)
+    uexpr = get_uexpr_for_output_neuron_simple(man, element, op_idx)
+    for dim_idx in range(0, dimension):
+        l_i.append(lexpr[0].sup_coeff[dim_idx])
+        u_i.append(uexpr[0].sup_coeff[dim_idx])
+    l_i.append(lexpr[0].sup_cst)
+    u_i.append(uexpr[0].sup_cst)
+    l_outneuron_coef.append(l_i)
+    u_outneuron_coef.append(u_i)
+
+lexpr_coeff = reorganize_output(l_outneuron_coef, hidden_size, timestep, 3, output_size)
+uexpr_coeff = reorganize_output(u_outneuron_coef, hidden_size, timestep, 3, output_size)
+
+print(lexpr_coeff)
+print(uexpr_coeff)
+'''
+for i in range (0, output_size):
+
+    print('Output Neuron: {}'.format(i))
+    print('Lower bound:')
+    lexpr = get_lexpr_for_output_neuron_simple(man, element, i)
+    print('constant: {}'.format(lexpr[0].sup_cst))
+    print('coefficients:')
+    for j in range(0, lexpr[0].size):
+        print('dim[{}]: {}'.format(lexpr[0].dim[i], lexpr[0].sup_coeff[i]))
+    print('Upper bound:')
+    uexpr = get_uexpr_for_output_neuron_simple(man, element, i)
+    print('constant: {}'.format(lexpr[0].sup_cst))
+    print('coefficients:')
+    for j in range(0, uexpr[0].size):
+        print('dim[{}]: {}'.format(uexpr[0].dim[i], uexpr[0].sup_coeff[i]))
+'''
 rnn_handle_last_relu_layer(man, element, weights_i_ptr, bias_l, dim_l, compare_size, dimension, pre_l, False, True)
 
 lb_1 = lb_for_neuron(man, element, 4, 0)# 0,1
