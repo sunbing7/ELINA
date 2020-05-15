@@ -320,6 +320,11 @@ fppoly_t* fppoly_of_abstract0(elina_abstract0_t* a);
 
 void fppoly_add_new_layer(fppoly_t *fp, size_t size, layertype_t type, activation_type_t activation);
 
+// lstm
+void fppoly_handle_intermediate_lstm_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic);
+//void fppoly_handle_intermediate_lstm_layer_2(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic);
+
+void fppoly_handle_last_lstm_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic);
 #ifdef __cplusplus
  }
 #endif

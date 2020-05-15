@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "fppoly.h"
 #include "lstm_approx.c"
+
 #if HAS_RNN
 #define HAS_DEEPPOLY_EXAMPLE    0
 #define HAS_FPPOLY_PY_EXAMPLE   0
@@ -19,8 +20,113 @@ int main(int argc, char **argv) {
     man = fppoly_manager_alloc();
 #if HAS_LSTM_DEMO
 
-#define Their_test  1
 
+#define our_test    0
+#define Their_test  0
+#define value_test  1
+ /*
+  * input
+  */
+#if value_test
+    #include "matrix.h"
+    double lpp[DIMENSTION][DIMENSTION];
+    double expr_cst[DIMENSTION];
+    size_t expr_dim[DIMENSTION][DIMENSTION];
+    size_t expr_size[DIMENSTION];
+
+    for (int i = 0; i < DIMENSTION; i++) {
+        for (int j = 0; j < DIMENSTION; j++) {
+            if (i == j) {
+                lpp[i][j] = 1.0;
+            } else {
+                lpp[i][j] = 0.0;
+            }
+            expr_dim[i][j] = j;
+        }
+        expr_cst[i] = 0.0;
+        expr_size[i] = DIMENSTION;
+    }
+
+    double * weights_ptr[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr[i] = &(W_net[i]);
+    }
+
+    double * in_ptr[DIMENSTION];
+    for (int i = 0; i < DIMENSTION; i++) {
+        in_ptr[i] = &(lpp[i]);
+    }
+
+
+    double * weights_ptr_op[OUT_CLASS];
+    for (int i = 0; i < OUT_CLASS; i++) {
+        weights_ptr_op[i] = &weight_op[i];
+    }
+
+    /*
+     *  compare layer
+     *  def get_compare_matrix(y1, y2, dim):
+    matrix = np.array([0.0] * dim)
+    for i in range(0, dim):
+        if i == y1:
+            matrix[i] = 1.0
+        elif i == y2:
+            matrix[i] = -1.0
+    return matrix
+     */
+    double weights_l[OUT_CLASS * (OUT_CLASS - 1)][DIMENSTION];
+    double bias_l[OUT_CLASS * (OUT_CLASS - 1)];
+
+    int w_idx = 0;
+    for (int y1_idx = 0; y1_idx < OUT_CLASS; y1_idx++) {
+        for (int y2_idx = 0; y2_idx < OUT_CLASS; y2_idx++) {
+            if (y1_idx == y2_idx)
+                continue;
+            bias_l[w_idx] = 0.0;
+            /* get compare coefficient */
+            for (int i = 0; i < DIMENSTION; i++) {
+                if (i == y1_idx)
+                    weights_l[w_idx][i] = 1.0;
+                else if (i == y2_idx)
+                    weights_l[w_idx][i] = -1.0;
+                else
+                    weights_l[w_idx][i] = 0.0;
+            }
+            w_idx++;
+        }
+    }
+
+
+
+    double * weights_l_ptr[OUT_CLASS * (OUT_CLASS - 1)];
+
+    for (int i = 0; i < OUT_CLASS * (OUT_CLASS - 1); i++) {
+        weights_l_ptr[i] = &(weights_l[i]);
+    }
+
+    size_t predecessor_l[1] = {TIMESTEP + 2};
+
+    size_t predecessor[1] = {-1};
+    size_t predecessor_l1[1] = {1};
+    size_t predecessor_o[1] = {TIMESTEP + 1};
+
+    // (*(fppoly_t*)(element->value))->layers[0]->neurons[7]
+
+    element = fppoly_from_network_input_poly(man, 0, DIMENSTION, inf, sup, lpp, expr_cst, expr_dim, lpp, expr_cst, expr_dim, expr_size[0]);
+
+    ffn_handle_first_mul_layer_(man, element, in_ptr, ip_bias, expr_dim,  DIMENSTION, predecessor);
+
+    lstm_handle_intermediate_layer_(man, element, weights_ptr, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l1, true);
+
+    lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, expr_dim, HIDDEN_LAYER, OUT_CLASS, predecessor_o, true);
+
+    //compare classes
+    lstm_handle_last_layer_(man, element, weights_l_ptr,  &bias_l, expr_dim, DIMENSTION, OUT_CLASS * (OUT_CLASS - 1), predecessor_l, true);
+
+    //for debug only
+    handle_lstm_layer_(man, element, weights_ptr,  bias_h, expr_dim, 3, 1, predecessor_l1, true);
+#endif  /* value_test */
 #if Their_test
     /*
   * input
@@ -77,7 +183,7 @@ int main(int argc, char **argv) {
      * layer 2
      */
 
-    double W_f2[3] = {0.06, 0.03, 0.0};
+
 
 
     double W_i2[3] = {0.25, 0.5, 0.0};
@@ -85,7 +191,7 @@ int main(int argc, char **argv) {
 
     double W_c2[3] = {0.4, 0.3, 0.0};
 
-
+    double W_f2[3] = {0.06, 0.03, 0.0};
     double W_o2[3] = {0.04, 0.02, 0.0};
 
 
@@ -112,15 +218,14 @@ int main(int argc, char **argv) {
     double * weights_ptr_op[2];
     weights_ptr_op[0] = &weight_op;
 
-    size_t predecessor_l1[1] = {1};
-    size_t predecessor_l2[1] = {2};
-    size_t predecessor_o[1] = {3};
+    size_t predecessor_l1[1] = {0};
+    size_t predecessor_l2[1] = {1};
+    size_t predecessor_o[1] = {2};
 
     element = fppoly_from_network_input_poly(man, 0, 3, inf, sup,
                                              lpp, lexpr_cst, lexpr_dim, upp,
                                              uexpr_cst, uexpr_dim, lexpr_size[0]);
 
-    //create_lstm_layer(man, element, 2, predecessor);
     ffn_handle_first_mul_layer_(man, element, in_ptr, ip_bias, lexpr_dim,  3, predecessor);
 
     //handle_lstm_layer_(man, element, weights_ptr,  bias, 8, 2, lexpr_dim, predecessor_l1, true);
@@ -131,7 +236,8 @@ int main(int argc, char **argv) {
     lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, lexpr_dim, 1, 1, predecessor_o, true);
     //for debug only
     handle_lstm_layer_(man, element, weights_ptr,  bias, lexpr_dim, 3, 1, predecessor_l1, true);
-#else
+#endif
+#if our_test
     /*
       * input
       */

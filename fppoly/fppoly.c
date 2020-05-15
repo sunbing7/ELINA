@@ -20,8 +20,6 @@
 
 #include "backsubstitute.h"
 
-
-
 fppoly_t* fppoly_of_abstract0(elina_abstract0_t* a)
 {
   return (fppoly_t*)a->value;
@@ -439,8 +437,36 @@ void ffn_handle_first_sub_layer(elina_manager_t* man, elina_abstract0_t * abs,  
 	}
 }
 #if HAS_RNN
+#define DIMENSTION 26
 void ffn_handle_first_mul_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim,  size_t size, size_t *predecessors){
+#if 0   // sunbing debug
+    double lpp[DIMENSTION][DIMENSTION];
+    double expr_cst[DIMENSTION];
+    size_t expr_dim_[DIMENSTION][DIMENSTION];
+    size_t expr_size[DIMENSTION];
+
+    for (int i = 0; i < DIMENSTION; i++) {
+        for (int j = 0; j < DIMENSTION; j++) {
+            if (i == j) {
+                lpp[i][j] = 1.0;
+            } else {
+                lpp[i][j] = 0.0;
+            }
+            expr_dim_[i][j] = j;
+        }
+        expr_cst[i] = 0.0;
+        expr_size[i] = DIMENSTION;
+    }
+
+    double * in_ptr[DIMENSTION];
+    for (int i = 0; i < DIMENSTION; i++) {
+        in_ptr[i] = &(lpp[i]);
+    }
+    double ip_bias[DIMENSTION] = {0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0};
     ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, size, predecessors, NONE, true, MATMUL_RNN);
+#endif
+    ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, size, predecessors, NONE, true, MATMUL_RNN);
+
 }
 #endif
 void ffn_handle_first_mul_layer(elina_manager_t* man, elina_abstract0_t * abs, double *bias,  size_t size, size_t *predecessors){
@@ -1633,7 +1659,7 @@ void fppoly_free(elina_manager_t *man, fppoly_t *fp){
 
 void fppoly_fprint(FILE* stream, elina_manager_t* man, fppoly_t* fp, char** name_of_dim){
 	size_t i;
-	for(i = 0; i < fp->numlayers; i++){
+	for(i = 0; i < fp->numlayers; i++){ //sunbing
 		fprintf(stream,"layer: %zu\n", i);
 		layer_fprint(stream, fp->layers[i], name_of_dim);
 	}
@@ -1825,3 +1851,40 @@ void update_bounds_for_neuron(elina_manager_t *man, elina_abstract0_t *abs, size
 	neuron->ub = ub;
 }
 
+//lstm
+void fppoly_handle_intermediate_lstm_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic) {
+    lstm_handle_intermediate_layer_(man, abs, weights,  bias, dim, d, h, predecessors, use_area_heuristic);
+}
+#if 0
+void fppoly_handle_intermediate_lstm_layer_2(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic) {
+    double W_i2[3] = {0.25, 0.5, 0.0};
+
+
+    double W_c2[3] = {0.4, 0.3, 0.0};
+
+    double W_f2[3] = {0.06, 0.03, 0.0};
+    double W_o2[3] = {0.04, 0.02, 0.0};
+
+
+    double * weights_ptr2[4];
+
+    {
+        weights_ptr2[0] = &(W_i2[0]);
+        weights_ptr2[1] = &(W_c2[0]);
+        weights_ptr2[2] = &(W_f2[0]);
+        weights_ptr2[3] = &(W_o2[0]);
+    }
+
+    double bias_o[4] = {0.01, 0.05, 0.002, 0.001};
+    size_t predecessor_l2[1] = {2};
+
+    size_t lexpr_dim[3][3] = {{0, 1, 2},
+                              {0, 1, 2},
+                              {0, 1, 2}
+    };
+    lstm_handle_intermediate_layer_(man, abs, weights_ptr2,  bias_o, lexpr_dim, 3, 1, predecessor_l2, use_area_heuristic);
+}
+#endif
+void fppoly_handle_last_lstm_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic) {
+    lstm_handle_last_layer_(man, abs, weights,  bias, dim, d, h, predecessors, use_area_heuristic);
+}

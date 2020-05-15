@@ -1,3 +1,8 @@
+import sys
+
+sys.path.insert(0, '/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/')
+sys.path.insert(0, '/Users/bing.sun/workspace/elina/ELINA-master-python/python_interface')
+
 import numpy as np
 from fppoly import *
 from elina_abstract0 import *
@@ -10,25 +15,28 @@ from utils import *
 from read_net_file import *
 from export_expr import *
 import re
-import sys
-
-sys.path.insert(0, '/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/')
+from lstm_tester import *
 
 libc = CDLL(find_library('c'))
 cstdout = c_void_p.in_dll(libc, '__stdoutp')
+
+lstm_test_on = False
+export_coef = True
+
 # input layer
-epsilon = 0.0005
+epsilon = 0.001
 
 input_pixel = 784
 output_size = 10
-hidden_size = 64
-step_size = 112
+hidden_size = 16
+hidden_gate = hidden_size * 4
+step_size = 392
 
-in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnRELU_input.pyt"
-net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnRELU_generated.pyt"
+in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/lstm_net_2_16.txt"
+net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnLSTM_generated_2_16.pyt"
 test_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/mnist_test.csv"
 
-coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_0.0005.csv"
+coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_lstm_{}_2_16.csv".format(epsilon)
 '''
 input_pixel = 9
 output_size = 3
@@ -53,7 +61,7 @@ W_ip, W_hh, W_op, bias_hh, bias_op, timestep, is_vanilarnn, mean, std = read_inp
 step_size = int(input_pixel / timestep)
 dimension = input_pixel + hidden_size
 
-convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, step_size, hidden_size, output_size, net_file, mean, std, "ReLU")
+convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, step_size, hidden_size, output_size, net_file, mean, std, "LSTM")
 
 
 weight_matrix, weight_out, bias, bias_out = read_tensorflow_net(net_file, input_pixel, True)
@@ -76,7 +84,7 @@ for i in range (0, timestep):
 
     predecessor_tmp = [0]
     predecessor_tmp = (c_size_t * len(predecessor_tmp))()
-    predecessor_tmp[0] = i
+    predecessor_tmp[0] = i + 1
     predecessor.append(predecessor_tmp)
 
 dim =  (c_size_t * dimension)()
@@ -94,7 +102,7 @@ bias_op = bias_out
 np.ascontiguousarray(bias_op, dtype = np.double)
 
 pre_op = [-1]
-pre_op = (c_size_t * len(pre_op))(timestep)
+pre_op = (c_size_t * len(pre_op))(timestep + 1)
 
 # intput layer
 
@@ -133,13 +141,23 @@ np.ascontiguousarray(lexpr_size, dtype=np.uintp)
 uexpr_size = uexpr_size.astype(np.uintp)
 np.ascontiguousarray(uexpr_size, dtype=np.uintp)
 
+# construct input layer
+
+weights_ip = np.identity(dimension, dtype = np.double)
+w_ip_tmp = np.ascontiguousarray(weights_ip, dtype = np.double)
+weights_ip_ptr = (w_ip_tmp.__array_interface__['data'][0] + np.arange(w_ip_tmp.shape[0]) * w_ip_tmp.strides[0]).astype(np.uintp)
+
+bias_ip = np.array([0.0] * dimension)
+np.ascontiguousarray(bias_ip, dtype = np.double)
+
+
 # for class comparision
 compare_size = int((output_size) * (output_size - 1))
 bias_l = np.array([0.0] * compare_size)
 np.ascontiguousarray(bias_l, dtype=np.double)
 
 pre_l = [0]
-pre_l = (c_size_t * len(pre_l))(timestep + 1)
+pre_l = (c_size_t * len(pre_l))(timestep + 2)
 
 
 def get_compare_matrix(y1, y2, dim):
@@ -170,105 +188,95 @@ csvfile = open(test_file, 'r')
 tests = csv.reader(csvfile, delimiter=',')
 
 # out coefficient file
-csvfile_coe = open(coeff_out_file, 'w')
-writer = csv.writer(csvfile_coe)
+if export_coef == True:
+    csvfile_coe = open(coeff_out_file, 'w')
+    writer = csv.writer(csvfile_coe)
 
 total_image = 0
 total_test_image = 0
 total_verified_image = 0
+
 for i, test in enumerate(tests):
     total_image = total_image + 1
     real_class = -1
     image = np.float64(test[1:len(test)]) / np.float64(255)
+    full_img = image
 
     hidden = [0.0] * hidden_size
 
     image = reorganize_input(image, hidden, timestep, step_size)
 
+    #test
+    if lstm_test_on == True:
+        image = np.array([0.01] * dimension)
+        full_img = np.array([0.01] * input_pixel)
+
+
     inf = np.copy(image)
     sup = np.copy(image)
 
-    #print(inf.tolist())
 
+   # normalize(inf, mean, std)
+   # normalize(sup, mean, std)
 
-    normalize(inf, mean, std)
-    normalize(sup, mean, std)
-    '''
+    pre_in = [1]
+    pre_in = (c_size_t * len(pre_in))(-1)
 
-    inf = np.array([2.0] * dimension)
-    sup = np.array([2.0] * dimension)
-    '''
+    # test
+    if lstm_test_on == True:
+        tester_w = np.concatenate((W_hh, W_ip), axis = 1)
+        tester_b = bias_hh
+        print('image {}:'.format(i))
+        hx1 = np.append(np.array([0.0] * hidden_size), full_img)
+
+        ci1 = np.array([0.0] * hidden_size)
+        c1, h1 = lstm_layer(hx1, ci1, tester_w, tester_b, hidden_size)
+
+        print('ct: {}\n'.format(c1))
+        print('ht: {}\n'.format(h1))
+        tester_wo = W_op
+        tester_bo = bias_out
+
+        tester_out = dense_op(h1, tester_wo, tester_bo, output_size)
+
 
     man = fppoly_manager_alloc()
     element = fppoly_from_network_input_poly(man , 0, dimension, inf, sup, lpp_new, lexpr_cst, lexpr_dim, upp_new, uexpr_cst, uexpr_dim , dimension)
 
-    rnn_handle_first_relu_layer(man, element, weights_ptr[0], bias_ptr[0], dim, hidden_size, dimension, predecessor[0])
+    lstm_handle_first_layer_(man, element, weights_ip_ptr, bias_ip, dim, dimension, pre_in)
 
+    for k in range (0, timestep):
+        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_ptr[k], dim, dimension, hidden_size, predecessor[k], True)
 
-    for k in range (1, timestep):
-        rnn_handle_intermediate_relu_layer(man, element, weights_ptr[k], bias_ptr[k], dim, hidden_size, dimension, predecessor[k], True)
+    lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, dimension, output_size, pre_op, True)
+    #elina_abstract0_fprint(cstdout, man, element, None)
 
-    rnn_handle_last_relu_layer(man, element, weights_op, bias_op, dim, output_size, dimension, pre_op, False, True)
-
-    lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, output_size, dimension, False)
-    csvfile_coe.write('test image {}\n'.format(i + 1))
-    csvfile_coe.write('lower bound expression coefficients\n')
-    for w_idx in range (0, output_size):
-        row = lexpr_coeff[w_idx]
-        writer.writerow(row)
-    csvfile_coe.write('upper bound expression coefficients\n')
-    for w_idx in range (0, output_size):
-        row = uexpr_coeff[w_idx]
-        writer.writerow(row)
-
-    '''
-    l_outneuron_coef = []
-    u_outneuron_coef = []
-
-    for op_idx in range(0, output_size):
-        l_i = []
-        u_i = []
-        lexpr = get_lexpr_for_output_neuron_simple(man, element, op_idx)
-        uexpr = get_uexpr_for_output_neuron_simple(man, element, op_idx)
-        for dim_idx in range(0, dimension):
-            l_i.append(lexpr[0].sup_coeff[dim_idx])
-            u_i.append(uexpr[0].sup_coeff[dim_idx])
-        l_i.append(lexpr[0].sup_cst)
-        u_i.append(uexpr[0].sup_cst)
-        l_outneuron_coef.append(l_i)
-        u_outneuron_coef.append(u_i)
-
-    lexpr_coeff = reorganize_output(l_outneuron_coef, hidden_size, timestep, 3, output_size)
-    uexpr_coeff = reorganize_output(u_outneuron_coef, hidden_size, timestep, 3, output_size)
-
-    print(lexpr_coeff)
-    print(uexpr_coeff)
-    '''
-    '''
-    elina_abstract0_fprint(cstdout, man, element, None)
-    result = rnn_is_greater(man, element, 0, 1, dimension, True)
-    result = rnn_is_greater(man, element, 0, 2, dimension, True)
-    result = rnn_is_greater(man, element, 0, 7, dimension, True)
-    result = rnn_is_greater(man, element, 1, 2, dimension, True)
-    result = rnn_is_greater(man, element, 2, 7, dimension, True)
-    result = rnn_is_greater(man, element, 7, 1, dimension, True)
-    '''
+    if export_coef == True:
+        lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, output_size, dimension, False)
+        csvfile_coe.write('test image {}\n'.format(i + 1))
+        csvfile_coe.write('lower bound expression coefficients\n')
+        for w_idx in range (0, output_size):
+            row = lexpr_coeff[w_idx]
+            writer.writerow(row)
+        csvfile_coe.write('upper bound expression coefficients\n')
+        for w_idx in range (0, output_size):
+            row = uexpr_coeff[w_idx]
+            writer.writerow(row)
 
     # verify property
-    rnn_handle_last_relu_layer(man, element, weights_l_ptr, bias_l, dim, compare_size, dimension, pre_l, False, True)
+    lstm_handle_last_layer_(man, element, weights_l_ptr, bias_l, dim, dimension, compare_size, pre_l, True)
+
+    #elina_abstract0_fprint(cstdout, man, element, None)
+
 
     cmp_idx = 0
     for out_i in range(0, output_size):
         flag = True
         label = out_i
         for j in range(0, output_size):
-            '''
-            if label != j and not rnn_is_greater(man, element, label, j, (dimension), True):
-                flag = False
-                break
-            '''
+
             if label != j:
-                result = lb_for_neuron(man, element, (timestep + 1), (cmp_idx))
+                result = lb_for_neuron(man, element, (timestep + 2), (cmp_idx))
                 cmp_idx = cmp_idx + 1
                 if result < 0.0:
                     flag = False
@@ -279,7 +287,7 @@ for i, test in enumerate(tests):
 
     #elina_abstract0_fprint(cstdout, man, element, None)
     elina_abstract0_free(man, element)
-
+    
     if real_class != int(test[0]):
         print("data image: {}, skipped and dominant class: {})".format((i + 1), real_class))
         continue
@@ -292,60 +300,34 @@ for i, test in enumerate(tests):
     inf = np.clip(np.array(image) - epsilon, 0, 1)
     sup = np.clip(np.array(image) + epsilon, 0, 1)
 
-    normalize(inf, mean, std)
-    normalize(sup, mean, std)
+    #normalize(inf, mean, std)
+    #normalize(sup, mean, std)
 
     man = fppoly_manager_alloc()
-    element = fppoly_from_network_input_poly(man, 0, dimension, inf, sup, lpp_new, lexpr_cst, lexpr_dim, upp_new,
-                                             uexpr_cst, uexpr_dim, dimension)
+    element = fppoly_from_network_input_poly(man , 0, dimension, inf, sup, lpp_new, lexpr_cst, lexpr_dim, upp_new, uexpr_cst, uexpr_dim , dimension)
 
-    rnn_handle_first_relu_layer(man, element, weights_ptr[0], bias_ptr[0], dim, hidden_size, dimension, predecessor[0])
+    lstm_handle_first_layer_(man, element, weights_ip_ptr, bias_ip, dim, dimension, pre_in)
 
-    for k in range(1, timestep):
-        rnn_handle_intermediate_relu_layer(man, element, weights_ptr[k], bias_ptr[k], dim, hidden_size, dimension,
-                                           predecessor[k], True)
+    for k in range (0, timestep):
+        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_ptr[k], dim, dimension, hidden_size, predecessor[k], True)
 
-    rnn_handle_last_relu_layer(man, element, weights_op, bias_op, dim, output_size, dimension, pre_op, False, True)
+    lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, dimension, output_size, pre_op, True)
+
     #elina_abstract0_fprint(cstdout, man, element, None)
+    if export_coef == True:
+        lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, output_size, dimension, False)
 
-    lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, output_size, dimension, False)
+        csvfile_coe.write('pertubed: lower bound expression coefficients\n')
+        for w_idx in range (0, output_size):
+            row = lexpr_coeff[w_idx]
+            writer.writerow(row)
+        csvfile_coe.write('pertubed: upper bound expression coefficients\n')
+        for w_idx in range (0, output_size):
+            row = uexpr_coeff[w_idx]
+            writer.writerow(row)
 
-    csvfile_coe.write('pertubed: lower bound expression coefficients\n')
-    for w_idx in range (0, output_size):
-        row = lexpr_coeff[w_idx]
-        writer.writerow(row)
-    csvfile_coe.write('pertubed: upper bound expression coefficients\n')
-    for w_idx in range (0, output_size):
-        row = uexpr_coeff[w_idx]
-        writer.writerow(row)
-
-    '''
-    l_outneuron_coef = []
-    u_outneuron_coef = []
-
-    for op_idx in range(0, output_size):
-        l_i = []
-        u_i = []
-        lexpr = get_lexpr_for_output_neuron_simple(man, element, op_idx)
-        uexpr = get_uexpr_for_output_neuron_simple(man, element, op_idx)
-        for dim_idx in range(0, dimension):
-            l_i.append(lexpr[0].sup_coeff[dim_idx])
-            u_i.append(uexpr[0].sup_coeff[dim_idx])
-        l_i.append(lexpr[0].sup_cst)
-        u_i.append(uexpr[0].sup_cst)
-        l_outneuron_coef.append(l_i)
-        u_outneuron_coef.append(u_i)
-
-    lexpr_coeff = reorganize_output(l_outneuron_coef, hidden_size, timestep, 3, output_size)
-    uexpr_coeff = reorganize_output(u_outneuron_coef, hidden_size, timestep, 3, output_size)
-
-    print(lexpr_coeff)
-    print(uexpr_coeff)
-    '''
     # verify property
-    rnn_handle_last_relu_layer(man, element, weights_l_ptr, bias_l, dim, compare_size, dimension, pre_l, False, True)
-
-    lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, compare_size, dimension, True)
+    lstm_handle_last_layer_(man, element, weights_l_ptr, bias_l, dim, dimension, compare_size, pre_l, True)
 
     #elina_abstract0_fprint(cstdout, man, element, None)
     cmp_idx = 0
@@ -353,13 +335,9 @@ for i, test in enumerate(tests):
         flag = True
         label = out_i
         for j in range(0, output_size):
-            '''
-            if label != j and not rnn_is_greater(man, element, label, j, (dimension), True):
-                flag = False
-                break
-            '''
+
             if label != j:
-                result = lb_for_neuron(man, element, (timestep + 1), (cmp_idx))
+                result = lb_for_neuron(man, element, (timestep + 2), (cmp_idx))
                 cmp_idx = cmp_idx + 1
                 if result < 0.0:
                     flag = False
@@ -377,8 +355,8 @@ for i, test in enumerate(tests):
 
     #if i == 5:
     #    break
-
-csvfile_coe.close()
+if export_coef == True:
+    csvfile_coe.close()
 csvfile.close()
 
 total_verified_percentage = total_verified_image / total_test_image

@@ -53,7 +53,7 @@ def extract_std(text):
 
 def extract_timestep(text):
     timestep = ''
-    m = re.search(': (.+?)', text)
+    m = re.search(': (.*.*.*?)', text)
 
     if m:
         timestep = m.group(1)
@@ -106,7 +106,7 @@ def read_tensorflow_net(net_file, in_len, is_trained_with_pytorch):
 
     while True:
         curr_line = net.readline()[:-1]
-        if curr_line in ["ReLU", "Sigmoid", "Tanh", "Affine"]:
+        if curr_line in ["ReLU", "Sigmoid", "Tanh", "Affine", "LSTM"]:
             print(curr_line)
             W = None
             if (last_layer in ["Conv2D", "ParSumComplete", "ParSumReLU"]) and is_trained_with_pytorch:
@@ -125,6 +125,9 @@ def read_tensorflow_net(net_file, in_len, is_trained_with_pytorch):
                 weight_matrix.append(W)
                 bias.append(b)
                 #x = tf.nn.relu(tf.nn.bias_add(tf.matmul(tf.reshape(x, [1, numel(x)]),W), b))
+            elif(curr_line=="LSTM"):
+                weight_matrix.append(W)
+                bias.append(b)
 
             elif(curr_line=="Sigmoid"):
                 x = tf.nn.sigmoid(tf.nn.bias_add(tf.matmul(tf.reshape(x, [1, numel(x)]),W), b))
@@ -135,7 +138,7 @@ def read_tensorflow_net(net_file, in_len, is_trained_with_pytorch):
         else:
             raise Exception("Unsupported Operation: ", curr_line)
         last_layer = curr_line
-
+    net.close()
     return weight_matrix, weight_out, bias, bias_out
 
 '''
@@ -169,12 +172,14 @@ def convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, input_size, h
     in_len = input_size * timestep
     dim = in_len + hidden_size
 
-    if activation != "ReLU":
+    if activation != "ReLU" and activation != "LSTM":
         return
     # flattern weight matrix for each timestep:
     weight = []
-
-    weight_pad = np.zeros(shape = (hidden_size, 1))
+    if activation == 'LSTM':
+        weight_pad = np.zeros(shape = (hidden_size * 4, 1))
+    else:
+        weight_pad = np.zeros(shape=(hidden_size, 1))
 
     for i in range (0, timestep):
 
@@ -201,7 +206,7 @@ def convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, input_size, h
     out = open(out_file, 'w')
 
     for i in range(0, timestep):
-        out.write("ReLU\n")
+        out.write("{}\n".format(activation))
 
         itemList = []
         for item in weight[i]:
@@ -254,7 +259,10 @@ def read_input_file(in_file):
             W_ip = parseVec(net)
             W_hh = parseVec(net)
             bias_hh = parseVec(net)
-
+        elif curr_line == 'LSTM':
+            W_ip = parseVec(net)
+            W_hh = parseVec(net)
+            bias_hh = parseVec(net)
         elif 'Affine' in curr_line:
             W_op = parseVec(net)
             bias_op = parseVec(net)
@@ -281,3 +289,20 @@ def reorganize_input(input, hidden, timestep, step_size):
 
     return output
 
+def reorganize_output(input, hidden_size, timestep, step_size, out_size):
+    output = []
+
+    for op_idx in range (0, out_size):
+        input_i = input[op_idx]
+        output_i = []
+
+        for i in range (0, hidden_size):
+            output_i.append(input_i[i])
+        for i in range (timestep, 0, -1):
+            index = (i - 1) * step_size
+            for j in range(0, step_size):
+                output_i.append(input_i[index + j + hidden_size])
+        output_i.append(input_i[hidden_size + timestep * step_size])
+        output.append(output_i)
+
+    return output
