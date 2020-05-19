@@ -34,6 +34,14 @@ int main(int argc, char **argv) {
     size_t expr_dim[DIMENSTION][DIMENSTION];
     size_t expr_size[DIMENSTION];
 
+    //sunbing
+    uint8_t volatile test_buf[4][592];
+
+    size_t volatile *dim0_temp = (size_t*)&test_buf[0];
+    size_t volatile *dim1_temp = (size_t*)&test_buf[1];
+    size_t volatile *dim2_temp = (size_t*)&test_buf[2];
+    size_t volatile *dim3_temp = (size_t*)&test_buf[3];
+
     for (int i = 0; i < DIMENSTION; i++) {
         for (int j = 0; j < DIMENSTION; j++) {
             if (i == j) {
@@ -41,17 +49,67 @@ int main(int argc, char **argv) {
             } else {
                 lpp[i][j] = 0.0;
             }
-            expr_dim[i][j] = j;
+            expr_dim[i][j] = (uint64_t)j;
         }
         expr_cst[i] = 0.0;
         expr_size[i] = DIMENSTION;
     }
 
+    /* layer 1 */
     double * weights_ptr[HIDDEN_GATE];
     for (int i = 0; i < HIDDEN_GATE; i++)
     {
         weights_ptr[i] = &(W_net[i]);
     }
+
+    /* layer 2 */
+    double * weights_ptr2[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr2[i] = &(W_net2[i]);
+    }
+
+
+    /* layer 3 */
+    double * weights_ptr3[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr3[i] = &(W_net3[i]);
+    }
+
+
+    /* layer 4 */
+    double * weights_ptr4[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr4[i] = &(W_net4[i]);
+    }
+
+
+    /* layer 5 */
+    double * weights_ptr5[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr5[i] = &(W_net5[i]);
+    }
+
+
+    /* layer 6 */
+    double * weights_ptr6[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr6[i] = &(W_net6[i]);
+    }
+
+
+    /* layer 7 */
+    double * weights_ptr7[HIDDEN_GATE];
+    for (int i = 0; i < HIDDEN_GATE; i++)
+    {
+        weights_ptr7[i] = &(W_net7[i]);
+    }
+
+
 
     double * in_ptr[DIMENSTION];
     for (int i = 0; i < DIMENSTION; i++) {
@@ -64,17 +122,6 @@ int main(int argc, char **argv) {
         weights_ptr_op[i] = &weight_op[i];
     }
 
-    /*
-     *  compare layer
-     *  def get_compare_matrix(y1, y2, dim):
-    matrix = np.array([0.0] * dim)
-    for i in range(0, dim):
-        if i == y1:
-            matrix[i] = 1.0
-        elif i == y2:
-            matrix[i] = -1.0
-    return matrix
-     */
     double weights_l[OUT_CLASS * (OUT_CLASS - 1)][DIMENSTION];
     double bias_l[OUT_CLASS * (OUT_CLASS - 1)];
 
@@ -109,6 +156,12 @@ int main(int argc, char **argv) {
 
     size_t predecessor[1] = {-1};
     size_t predecessor_l1[1] = {1};
+    size_t predecessor_l2[1] = {2};
+    size_t predecessor_l3[1] = {3};
+    size_t predecessor_l4[1] = {4};
+    size_t predecessor_l5[1] = {5};
+    size_t predecessor_l6[1] = {6};
+    size_t predecessor_l7[1] = {7};
     size_t predecessor_o[1] = {TIMESTEP + 1};
 
     // (*(fppoly_t*)(element->value))->layers[0]->neurons[7]
@@ -118,6 +171,12 @@ int main(int argc, char **argv) {
     ffn_handle_first_mul_layer_(man, element, in_ptr, ip_bias, expr_dim,  DIMENSTION, predecessor);
 
     lstm_handle_intermediate_layer_(man, element, weights_ptr, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l1, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr2, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l2, true);
+    //lstm_handle_intermediate_layer_(man, element, weights_ptr3, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l3, true);
+    //lstm_handle_intermediate_layer_(man, element, weights_ptr4, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l4, true);
+    //lstm_handle_intermediate_layer_(man, element, weights_ptr5, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l5, true);
+    //lstm_handle_intermediate_layer_(man, element, weights_ptr6, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l6, true);
+    //lstm_handle_intermediate_layer_(man, element, weights_ptr7, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l7, true);
 
     lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, expr_dim, HIDDEN_LAYER, OUT_CLASS, predecessor_o, true);
 

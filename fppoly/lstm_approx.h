@@ -30,8 +30,8 @@ extern "C" {
 #include "backsubstitute.h"
 #define HAS_LSTM    1
 #if HAS_LSTM
-expr_t * lexpr_replace_maxpool_or_lstm_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, layer_t * prev_layer);
-expr_t * uexpr_replace_maxpool_or_lstm_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, layer_t * prev_layer);
+expr_t * lexpr_replace_maxpool_or_lstm_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t num_neu_out);
+expr_t * uexpr_replace_maxpool_or_lstm_bounds_(fppoly_internal_t * pr, expr_t * expr, neuron_t ** neurons, size_t num_neu_out);
 void handle_lstm_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t d, size_t h, size_t * dim, size_t * predecessors, bool use_area_heuristic);
 void lstm_handle_first_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic);
 void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic);

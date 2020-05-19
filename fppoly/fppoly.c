@@ -439,34 +439,7 @@ void ffn_handle_first_sub_layer(elina_manager_t* man, elina_abstract0_t * abs,  
 #if HAS_RNN
 #define DIMENSTION 26
 void ffn_handle_first_mul_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim,  size_t size, size_t *predecessors){
-#if 0   // sunbing debug
-    double lpp[DIMENSTION][DIMENSTION];
-    double expr_cst[DIMENSTION];
-    size_t expr_dim_[DIMENSTION][DIMENSTION];
-    size_t expr_size[DIMENSTION];
-
-    for (int i = 0; i < DIMENSTION; i++) {
-        for (int j = 0; j < DIMENSTION; j++) {
-            if (i == j) {
-                lpp[i][j] = 1.0;
-            } else {
-                lpp[i][j] = 0.0;
-            }
-            expr_dim_[i][j] = j;
-        }
-        expr_cst[i] = 0.0;
-        expr_size[i] = DIMENSTION;
-    }
-
-    double * in_ptr[DIMENSTION];
-    for (int i = 0; i < DIMENSTION; i++) {
-        in_ptr[i] = &(lpp[i]);
-    }
-    double ip_bias[DIMENSTION] = {0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0,	0};
     ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, size, predecessors, NONE, true, MATMUL_RNN);
-#endif
-    ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, size, predecessors, NONE, true, MATMUL_RNN);
-
 }
 #endif
 void ffn_handle_first_mul_layer(elina_manager_t* man, elina_abstract0_t * abs, double *bias,  size_t size, size_t *predecessors){
@@ -1659,10 +1632,12 @@ void fppoly_free(elina_manager_t *man, fppoly_t *fp){
 
 void fppoly_fprint(FILE* stream, elina_manager_t* man, fppoly_t* fp, char** name_of_dim){
 	size_t i;
-	for(i = 0; i < fp->numlayers; i++){ //sunbing
+#if 1
+	for(i = 1; i < fp->numlayers; i++){ //sunbing
 		fprintf(stream,"layer: %zu\n", i);
 		layer_fprint(stream, fp->layers[i], name_of_dim);
 	}
+#endif
 	size_t output_size = fp->layers[fp->numlayers-1]->dims;
 	if(fp->out!=NULL){
 		fprintf(stream,"OUTPUT bounds: \n");

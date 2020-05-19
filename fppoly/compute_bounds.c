@@ -298,7 +298,7 @@ double get_lb_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 		else{
 			expr_t * tmp_l = lexpr;
 #if HAS_LSTM
-			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]);
+			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
 #else
 			*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds(pr,lexpr,aux_neurons);
 #endif
@@ -313,6 +313,7 @@ double get_ub_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 	neuron_t ** aux_neurons = fp->layers[k]->neurons;
 	expr_t *uexpr = *uexpr_ptr;
 	double res = INFINITY;
+
 	if(fp->layers[k]->type==FFN || fp->layers[k]->type==CONV){
 			
 		    if(fp->layers[k]->activation==RELU){
@@ -344,13 +345,13 @@ double get_ub_using_predecessor_layer(fppoly_internal_t * pr,fppoly_t *fp, expr_
 			}	
 				tmp_u = uexpr;		
 				res = compute_ub_from_expr(pr,uexpr,fp,k);	
-				*uexpr_ptr = expr_from_previous_layer(pr,uexpr, fp->layers[k]);		
+				*uexpr_ptr = expr_from_previous_layer(pr,uexpr, fp->layers[k]);
 				free_expr(tmp_u);
 			}
 		else{
 			expr_t * tmp_u = uexpr;
 #if HAS_LSTM
-			*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]);
+            *uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]->dims);
 #else
 			*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds(pr,uexpr,aux_neurons);
 #endif
@@ -376,6 +377,7 @@ double get_lb_using_previous_layers(elina_manager_t *man, fppoly_t *fp, expr_t *
 		k = fp->layers[layerno]->predecessors[0]-1;
 	}	
 	double res = INFINITY;
+
 	while(k >=0){
 	
 		if(fp->layers[k]->type==RESIDUAL){
@@ -439,7 +441,7 @@ double get_lb_using_previous_layers(elina_manager_t *man, fppoly_t *fp, expr_t *
 	   
 			
 	}
-		
+
 	res = fmin(res,compute_lb_from_expr(pr,lexpr,fp,-1)); 
         free_expr(lexpr);
 	return res;
@@ -451,8 +453,9 @@ double get_ub_using_previous_layers(elina_manager_t *man, fppoly_t *fp, expr_t *
 	size_t i;
 	int k;
 	//size_t numlayers = fp->numlayers;
+
 	expr_t * uexpr = copy_expr(expr);
-        fppoly_internal_t * pr = fppoly_init_from_manager(man,ELINA_FUNID_ASSIGN_LINEXPR_ARRAY);
+	fppoly_internal_t * pr = fppoly_init_from_manager(man,ELINA_FUNID_ASSIGN_LINEXPR_ARRAY);
         
 	if(fp->numlayers==layerno){
 		k = layerno-1;
@@ -516,8 +519,7 @@ double get_ub_using_previous_layers(elina_manager_t *man, fppoly_t *fp, expr_t *
 				continue;
 			}
 			else {
-				
-				 res= fmin(res,get_ub_using_predecessor_layer(pr,fp, &uexpr, k, use_area_heuristic));
+				 res = fmin(res,get_ub_using_predecessor_layer(pr,fp, &uexpr, k, use_area_heuristic));
 				 k = fp->layers[k]->predecessors[0]-1;
 				 
 			}

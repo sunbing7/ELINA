@@ -20,7 +20,7 @@ from lstm_tester import *
 libc = CDLL(find_library('c'))
 cstdout = c_void_p.in_dll(libc, '__stdoutp')
 
-lstm_test_on = False
+lstm_test_on = True
 export_coef = True
 
 # input layer
@@ -30,13 +30,13 @@ input_pixel = 784
 output_size = 10
 hidden_size = 16
 hidden_gate = hidden_size * 4
-step_size = 392
+step_size = 112
 
-in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/lstm_net_2_16.txt"
-net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnLSTM_generated_2_16.pyt"
+in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/lstm_net_7_16.txt"
+net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnLSTM_generated_7_16.pyt"
 test_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/mnist_test.csv"
 
-coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_lstm_{}_2_16.csv".format(epsilon)
+coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_lstm_{}_7_16.csv".format(epsilon)
 '''
 input_pixel = 9
 output_size = 3
@@ -68,7 +68,7 @@ weight_matrix, weight_out, bias, bias_out = read_tensorflow_net(net_file, input_
 # intermediate layer (hidden layer)
 
 weights_ptr = []
-bias_ptr = []
+#bias_ptr
 #weights_op_ptr
 #bias_op_ptr
 predecessor = []
@@ -78,14 +78,16 @@ for i in range (0, timestep):
     weights_tmp = (weight_matrix[i].__array_interface__['data'][0] + np.arange(weight_matrix[i].shape[0]) * weight_matrix[i].strides[0]).astype(np.uintp)
     weights_ptr.append(weights_tmp)
 
-    bias_tmp = bias[i]
-    np.ascontiguousarray(bias_tmp, dtype=np.double)
-    bias_ptr.append(bias_tmp)
-
     predecessor_tmp = [0]
     predecessor_tmp = (c_size_t * len(predecessor_tmp))()
     predecessor_tmp[0] = i + 1
     predecessor.append(predecessor_tmp)
+
+bias_tmp = bias[0]
+#bias_tmp = np.array([10.0] * (hidden_size * 4))
+bias_tmp = np.ascontiguousarray(bias_tmp, dtype=np.double)
+
+
 
 dim =  (c_size_t * dimension)()
 for i in range (0, dimension):
@@ -207,9 +209,9 @@ for i, test in enumerate(tests):
     image = reorganize_input(image, hidden, timestep, step_size)
 
     #test
-    if lstm_test_on == True:
-        image = np.array([0.01] * dimension)
-        full_img = np.array([0.01] * input_pixel)
+    #if lstm_test_on == True:
+     #   image = np.array([1.0] * dimension)
+     #   full_img = np.array([1.0] * input_pixel)
 
 
     inf = np.copy(image)
@@ -224,18 +226,39 @@ for i, test in enumerate(tests):
 
     # test
     if lstm_test_on == True:
-        tester_w = np.concatenate((W_hh, W_ip), axis = 1)
+
+
+
+        tester_w = np.concatenate((W_hh, W_ip), axis=1)
         tester_b = bias_hh
-        print('image {}:'.format(i))
-        hx1 = np.append(np.array([0.0] * hidden_size), full_img)
 
-        ci1 = np.array([0.0] * hidden_size)
-        c1, h1 = lstm_layer(hx1, ci1, tester_w, tester_b, hidden_size)
 
-        print('ct: {}\n'.format(c1))
-        print('ht: {}\n'.format(h1))
-        tester_wo = W_op
-        tester_bo = bias_out
+        for i in range (0, timestep):
+            start = i * step_size
+            step_image = np.array([])
+            j = start
+            for j in range (start, start + step_size):
+                step_image = np.append(step_image, full_img[j])
+
+
+            if i == 0:
+                hx1 = np.array([0.0] * hidden_size)
+            else:
+                hx1 = np.array(h1)
+
+            hx1 = np.append(hx1, step_image)
+
+            #print('timestep {}:'.format(i))
+            if i == 0:
+                ci1 = np.array([0.0] * hidden_size)
+            else:
+                ci1 = np.array(c1)
+            c1, h1 = lstm_layer(hx1, ci1, tester_w, tester_b, hidden_size)
+
+            #print('ct: {}\n'.format(c1))
+            print('{} ht: {}\n'.format(i, h1))
+            tester_wo = W_op
+            tester_bo = bias_out
 
         tester_out = dense_op(h1, tester_wo, tester_bo, output_size)
 
@@ -246,10 +269,12 @@ for i, test in enumerate(tests):
     lstm_handle_first_layer_(man, element, weights_ip_ptr, bias_ip, dim, dimension, pre_in)
 
     for k in range (0, timestep):
-        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_ptr[k], dim, dimension, hidden_size, predecessor[k], True)
+        print(k)
+        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_tmp, dim, dimension, hidden_size, predecessor[k], True)
+        elina_abstract0_fprint(cstdout, man, element, None)
 
-    lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, dimension, output_size, pre_op, True)
-    #elina_abstract0_fprint(cstdout, man, element, None)
+    lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, hidden_size, output_size, pre_op, True)
+    elina_abstract0_fprint(cstdout, man, element, None)
 
     if export_coef == True:
         lexpr_coeff, uexpr_coeff = get_expr_coeff(man, element, hidden_size, timestep, step_size, output_size, dimension, False)
@@ -309,7 +334,7 @@ for i, test in enumerate(tests):
     lstm_handle_first_layer_(man, element, weights_ip_ptr, bias_ip, dim, dimension, pre_in)
 
     for k in range (0, timestep):
-        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_ptr[k], dim, dimension, hidden_size, predecessor[k], True)
+        lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_tmp, dim, dimension, hidden_size, predecessor[k], True)
 
     lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, dimension, output_size, pre_op, True)
 
@@ -329,7 +354,7 @@ for i, test in enumerate(tests):
     # verify property
     lstm_handle_last_layer_(man, element, weights_l_ptr, bias_l, dim, dimension, compare_size, pre_l, True)
 
-    #elina_abstract0_fprint(cstdout, man, element, None)
+    elina_abstract0_fprint(cstdout, man, element, None)
     cmp_idx = 0
     for out_i in range(0, output_size):
         flag = True

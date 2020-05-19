@@ -59,9 +59,9 @@ void update_state_using_predecessor_layer(fppoly_internal_t *pr,fppoly_t *fp, ex
 		expr_t * tmp_l = lexpr;
 		expr_t * tmp_u = uexpr;
 #if HAS_LSTM
-		*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]);
+		*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
 
-		*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]);
+		*uexpr_ptr = uexpr_replace_maxpool_or_lstm_bounds_(pr,uexpr,aux_neurons, fp->layers[k]->dims);
 #else
 		*lexpr_ptr = lexpr_replace_maxpool_or_lstm_bounds(pr,lexpr,aux_neurons);
 				
