@@ -10,7 +10,8 @@
 #define HAS_FPPOLY_PY_EXAMPLE   0
 #define HAS_RNN_EXAMPLE         0
 #define HAS_RNN_DEMO            0
-#define HAS_LSTM_DEMO           1
+#define HAS_LSTM_DEMO           0
+#define HAS_RNN_TANH            1
 #endif
 
 int main(int argc, char **argv) {
@@ -21,9 +22,9 @@ int main(int argc, char **argv) {
 #if HAS_LSTM_DEMO
 
 
-#define our_test    0
+#define our_test    1
 #define Their_test  0
-#define value_test  1
+#define value_test  0
  /*
   * input
   */
@@ -172,11 +173,11 @@ int main(int argc, char **argv) {
 
     lstm_handle_intermediate_layer_(man, element, weights_ptr, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l1, true);
     lstm_handle_intermediate_layer_(man, element, weights_ptr2, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l2, true);
-    //lstm_handle_intermediate_layer_(man, element, weights_ptr3, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l3, true);
-    //lstm_handle_intermediate_layer_(man, element, weights_ptr4, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l4, true);
-    //lstm_handle_intermediate_layer_(man, element, weights_ptr5, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l5, true);
-    //lstm_handle_intermediate_layer_(man, element, weights_ptr6, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l6, true);
-    //lstm_handle_intermediate_layer_(man, element, weights_ptr7, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l7, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr3, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l3, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr4, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l4, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr5, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l5, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr6, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l6, true);
+    lstm_handle_intermediate_layer_(man, element, weights_ptr7, bias_h, expr_dim, DIMENSTION, HIDDEN_LAYER, predecessor_l7, true);
 
     lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, expr_dim, HIDDEN_LAYER, OUT_CLASS, predecessor_o, true);
 
@@ -303,8 +304,8 @@ int main(int argc, char **argv) {
 
     uint32_t timestep = 3;
 
-    double inf[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-    double sup[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double inf[8] = {1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0};
+    double sup[8] = {1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0};
     double lpp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
                         {0, 1, 0, 0, 0, 0, 0, 0},
                         {0, 0, 1, 0, 0, 0, 0, 0},
@@ -414,6 +415,38 @@ int main(int argc, char **argv) {
         weights_ptr2[i + 6] = &(W_f2[i]);
     }
 
+    /*
+     * layer 3
+     */
+
+    /*
+     * W_f, W_i, W_c, W_o
+     */
+    double W_f3[2][8] = {{0.1, -0.1, 1, 1, 0, 0, 0, 0},
+                         {-0.1, 0.1, 1, -1, 0, 0, 0, 0}};
+
+
+    double W_i3[2][8] = {{0.1, -0.1, 1, 1, 0, 0, 0, 0},
+                         {-0.1, 0.1, 1, -1, 0, 0, 0, 0}};
+
+
+    double W_c3[2][8] = {{0.1, -0.1, 1, 1, 0, 0, 0, 0},
+                         {-0.1, 0.1, 1, -1, 0, 0, 0, 0}};
+
+
+    double W_o3[2][8] = {{0.1, -0.1, 1, 1, 0, 0, 0, 0},
+                         {-0.1, 0.1, 1, -1, 0, 0, 0, 0}};
+
+
+    double * weights_ptr3[8];
+
+    for (int i = 0; i < 2; i++) {
+        weights_ptr3[i] = &(W_f3[i]);
+        weights_ptr3[i + 2] = &(W_i3[i]);
+        weights_ptr3[i + 4] = &(W_c3[i]);
+        weights_ptr3[i + 6] = &(W_o3[i]);
+    }
+
 
     double bias[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     double ip_bias[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -423,9 +456,17 @@ int main(int argc, char **argv) {
         in_ptr[i] = &(upp[i]);
     }
 
+    double weight_op[2] = {{-10.0, 10.0}, {-5, 13}};
+    double bias_op[2] = {0.0, 0.0};
+
+    double * weights_ptr_op[2];
+    weights_ptr_op[0] = &weight_op[0];
+    weights_ptr_op[1] = &weight_op[1];
+
     size_t predecessor_l1[1] = {1};
     size_t predecessor_l2[1] = {2};
-
+    size_t predecessor_l3[1] = {3};
+    size_t predecessor_o[1] = {4};
 
     element = fppoly_from_network_input_poly(man, 0, 8, inf, sup,
                                              lpp, lexpr_cst, lexpr_dim, upp,
@@ -438,6 +479,12 @@ int main(int argc, char **argv) {
     lstm_handle_intermediate_layer_(man, element, weights_ptr, bias, lexpr_dim, 8, 2, predecessor_l1, true);
 
     lstm_handle_intermediate_layer_(man, element, weights_ptr2, bias, lexpr_dim, 8, 2, predecessor_l2, true);
+
+    lstm_handle_intermediate_layer_(man, element, weights_ptr3, bias, lexpr_dim, 8, 2, predecessor_l3, true);
+
+    lstm_handle_last_layer_(man, element, weights_ptr_op,  &bias_op, lexpr_dim, 2, 2, predecessor_o, true);
+
+
 
     handle_lstm_layer_(man, element, weights_ptr,  bias, lexpr_dim, 8, 2, predecessor_l1, true);
 #endif
@@ -662,6 +709,263 @@ int main(int argc, char **argv) {
 
 
 #endif
+
+#if HAS_RNN_TANH
+    /*
+     *
+     * evaluate expression: *(fppoly_t*)(element->value)
+     */
+
+    /*
+     *  compare layer
+     */
+
+    double weights_l[2][8] = {
+            {1, -1, 0, 0, 0, 0, 0, 0},
+            {-1, 1, 0, 0, 0, 0, 0, 0}
+    };
+    double bias_l[2] = {0, 0};
+
+    double * weights_l_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        weights_l_ptr[i] = &(weights_l[i]);
+    }
+
+    size_t predecessor_l[1] = {4};
+
+
+    /*
+     *  output layer
+     */
+
+    double weights_out[2][8] = {
+            {1, 0, 0, 0, 0, 0, 0, 0},
+            {-1, 1, 0, 0, 0, 0, 0, 0}
+    };
+    double bias_out[2] = {0, -2};
+
+    double * weights_out_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        weights_out_ptr[i] = &(weights_out[i]);
+    }
+
+    size_t expr_dim_op[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    size_t predecessor_out[1] = {3};
+
+    size_t input_size_out = 2;
+    size_t output_size_out = 2;
+    /*
+     * layer 3:
+     */
+
+    double weights_l3[2][8] = {
+            {0.1, -0.1, 1.0, 1.0, 0, 0, 0, 0},
+            {-0.1, 0.1, 1.0, -1.0, 0, 0, 0, 0}
+    };
+
+    double bias_l3[2] = {0, 0};
+
+    size_t expr_dim_l3[2][8] = {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 4, 5, 6, 7}};
+
+    double * weights_l3_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        weights_l3_ptr[i] = &(weights_l3[i]);
+    }
+#if 0
+    double * expr_dim_l3_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        expr_dim_l3_ptr[i] = &(expr_dim_l3[i]);
+    }
+#else
+    double * expr_dim_l3_ptr = &(expr_dim_l3[0]);
+#endif
+    size_t predecessor_l3[1] = {3};
+
+    size_t input_size_l3 = 4;
+    size_t output_size_l3 = 2;
+
+    /*
+     * layer 2:
+     */
+
+    double weights_l2[2][8] = {
+            {0.1, -0.1, 0, 0, 1.0, 1.0, 0, 0},
+            {-0.1, 0.1, 0, 0, 1.0, -1.0, 0, 0}
+    };
+
+    double bias_l2[2] = {0, 0};
+
+    size_t expr_dim_l2[2][8] = {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 4, 5, 6, 7}};
+
+    double * weights_l2_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        weights_l2_ptr[i] = &(weights_l2[i]);
+    }
+#if 0
+    double * expr_dim_l2_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        expr_dim_l2_ptr[i] = &(expr_dim_l2[i]);
+    }
+#else
+    double * expr_dim_l2_ptr = &(expr_dim_l2[0]);
+#endif
+
+    size_t predecessor_l2[1] = {2};
+
+    size_t input_size_l2 = 4;
+    size_t output_size_l2 = 2;
+
+    /*
+     * layer 1:
+     */
+
+    double weights_l1[2][8] = {
+            {-0.1, 0.1, 0, 0, 0, 0, 1.0, -1.0},
+            {0.1, -0.1, 0, 0, 0, 0, 1.0, 1.0}
+    };
+
+    double bias_l1[2] = {0, 0};
+
+    size_t expr_dim_l1[2][8] = {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 4, 5, 6, 7}};
+
+    double * weights_l1_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        weights_l1_ptr[i] = &(weights_l1[i]);
+    }
+#if 0
+    double * expr_dim_l1_ptr[2];
+
+    for (int i = 0; i < 2; i++) {
+        expr_dim_l1_ptr[i] = &(expr_dim_l1[i]);
+    }
+#else
+    double * expr_dim_l1_ptr =  &(expr_dim_l1[0]);
+#endif
+    size_t predecessor_l1[1] = {1};
+
+    size_t input_size_l1 = 4;
+    size_t output_size_l1 = 2;
+
+    /*
+     * input
+     */
+
+    double inf[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double sup[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    double lpp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 1, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 1, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 1, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 1},
+    };
+    double upp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 1, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 1, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 1, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 1, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 1},
+    };
+
+    double lexpr_cst[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    double uexpr_cst[8] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    size_t lexpr_dim[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7}
+    };
+    size_t uexpr_dim[8][8] = {{0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7},
+                              {0, 1, 2, 3, 4, 5, 6, 7}
+    };
+
+    size_t lexpr_size[8] = {8, 8, 8, 8, 8, 8, 8, 8};
+
+    size_t predecessor[1] = {-1};
+
+
+
+    /* build abstract element of input layer from: inf, sup, lpp, upp, ldim, udim, lcst, ucst */
+    element = fppoly_from_network_input_poly(man, 0, 8, inf, sup,
+                                             lpp, lexpr_cst, lexpr_dim, upp,
+                                             uexpr_cst, uexpr_dim, lexpr_size[0]);
+    ffn_handle_first_tanh_layer_(man, element, weights_l1_ptr, bias_l1, expr_dim_l1_ptr, 2, 8, predecessor);
+
+
+    ffn_handle_intermediate_tanh_layer_(man, element, weights_l2_ptr, bias_l2, expr_dim_l2_ptr, 2, 8, predecessor_l1, true);
+
+    ffn_handle_intermediate_tanh_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, 2, 8, predecessor_l2, true);
+
+    ffn_handle_last_tanh_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
+
+    //get bounds
+    expr_t * lexpr = get_lexpr_for_output_neuron_simple(man, element, 0);
+    expr_t * uexpr = get_uexpr_for_output_neuron_simple(man, element, 0);
+
+    if (lexpr->size == uexpr->size) {
+        lexpr = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexpr = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
+
+    if (lexpr->size == uexpr->size) {
+        lexpr = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexpr = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
+
+    ffn_handle_last_tanh_layer_(man, element, weights_l_ptr, bias_l, expr_dim_op, 2, 8, predecessor_l, false, true);
+
+    expr_t * lexprY = get_lexpr_for_output_neuron_simple(man, element, 0);
+    expr_t * uexprY = get_uexpr_for_output_neuron_simple(man, element, 0);
+
+    if (lexprY->size == uexprY->size) {
+        lexprY = get_lexpr_for_output_neuron_simple(man, element, 1);
+        uexprY = get_uexpr_for_output_neuron_simple(man, element, 1);
+    }
+
+    double out_lb, out_last;
+    out_lb =  lb_for_neuron(man, element, 4, 0);
+    out_last = lb_for_neuron(man, element, 4, 1);
+
+    if (out_lb == out_last) {
+        ffn_handle_last_tanh_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
+    }
+    //compare class
+    bool result = false;
+    result = is_greater_(man, element, 0, 1, (2 + 6), true);
+    result = is_greater_(man, element, 1, 0, (2 + 6), true);
+    if (result == false) {
+        result = is_greater_(man, element, 0, 1, (2 + 6), true);
+
+        // for debug purpose only
+        ffn_handle_intermediate_tanh_layer_(man, element, weights_l3_ptr, bias_l3, expr_dim_l3_ptr, 2, 8,
+                                            predecessor_l2, true);
+    } else {
+        ffn_handle_last_tanh_layer_(man, element, weights_out_ptr, bias_out, expr_dim_op, 2, 8, predecessor_out, false, true);
+    }
+
+#endif
 #if HAS_RNN_EXAMPLE
     /*
      *
@@ -810,7 +1114,7 @@ int main(int argc, char **argv) {
      * input
      */
 
-    double inf[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    double inf[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
     double sup[8] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
     double lpp[8][8] = {{1, 0, 0, 0, 0, 0, 0, 0},
                         {0, 1, 0, 0, 0, 0, 0, 0},

@@ -106,5 +106,44 @@ def plot_result():
 
     return
 
+def plot_result_lstm():
+
+    epsolion = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.1]
+    lstm_2 = [1,	1,	0.988372093023255,	0.909090909090909,	0.738636363636364,	0.568181818181818,	0.271739130434783,	0.193181818181818,	0.125,	0]
+    lstm_4 = [0.916666666666667,	0.458333333333333,	0.236111111111111,	0.0277777777777778,	0,	0,	0,	0,	0,	0]
+    lstm_7 = [0,	0,	0,	0,	0,	0,	0,	0,	0,	0]
+    RNN_7 = [1,	1,	0.976744186,	0.976744186,	0.965116279,	0.895348837,	0.790697674,	0.558139535,	0.395348837, 0]
+
+
+    fig = plt.figure(num=3, figsize=(8, 5))
+    plt.xlabel('Epsilon')
+    plt.ylabel('Verfied Robustness')
+    plt.plot(epsolion, lstm_2,
+             color='green',
+             marker='o',
+             label='lstm_2'
+             )
+    plt.plot(epsolion, lstm_4,
+             color='c',
+             marker='o',
+             label='lstm_4'
+             )
+    plt.plot(epsolion, lstm_7,
+             color='b',
+             marker='o',
+             label='lstm_7'
+             )
+    plt.plot(epsolion, RNN_7,
+             color='red',
+             linewidth=1.0,
+             marker='^',
+             label='RNN_7'
+             )
+
+    plt.legend()
+    plt.show()
+
+    return
+
 #plot(inname, 10, 849)
-plot_result()
+plot_result_lstm()

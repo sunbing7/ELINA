@@ -118,13 +118,21 @@ def read_tensorflow_net(net_file, in_len, is_trained_with_pytorch):
             #b = myConst(b)
 
             if(curr_line=="Affine"):
-                #x = tf.nn.bias_add(tf.matmul(tf.reshape(x, [1, numel(x)]),W), b)
                 weight_out = W
                 bias_out = b
+
             elif(curr_line=="ReLU"):
                 weight_matrix.append(W)
                 bias.append(b)
-                #x = tf.nn.relu(tf.nn.bias_add(tf.matmul(tf.reshape(x, [1, numel(x)]),W), b))
+
+            elif(curr_line=="Tanh"):
+                weight_matrix.append(W)
+                bias.append(b)
+
+            elif(curr_line=="Sigmoid"):
+                weight_matrix.append(W)
+                bias.append(b)
+
             elif(curr_line=="LSTM"):
                 weight_matrix.append(W)
                 bias.append(b)
@@ -172,7 +180,7 @@ def convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, input_size, h
     in_len = input_size * timestep
     dim = in_len + hidden_size
 
-    if activation != "ReLU" and activation != "LSTM":
+    if activation != "ReLU" and activation != "Tanh" and activation != "Sigmoid" and activation != "LSTM":
         return
     # flattern weight matrix for each timestep:
     weight = []
@@ -256,6 +264,14 @@ def read_input_file(in_file):
         curr_line = net.readline()[:-1]
 
         if 'ReLU' in curr_line:
+            W_ip = parseVec(net)
+            W_hh = parseVec(net)
+            bias_hh = parseVec(net)
+        elif 'Tanh' in curr_line:
+            W_ip = parseVec(net)
+            W_hh = parseVec(net)
+            bias_hh = parseVec(net)
+        elif 'Sigmoid' in curr_line:
             W_ip = parseVec(net)
             W_hh = parseVec(net)
             bias_hh = parseVec(net)

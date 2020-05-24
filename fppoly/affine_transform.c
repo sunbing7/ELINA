@@ -63,7 +63,6 @@ expr_t * expr_from_previous_layer(fppoly_internal_t *pr, expr_t * expr, layer_t 
 			
 		}
 		
-		
 	}
 	res->inf_cst = res->inf_cst + expr->inf_cst; 
 	res->sup_cst = res->sup_cst + expr->sup_cst; 

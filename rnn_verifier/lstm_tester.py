@@ -37,16 +37,36 @@ def sigmoid(x):
     return out
 
 def lstm_cell(hx, ci, wi, wc, wf, wo, bi, bc, bf, bo):
-    f = sigmoid(np.matmul(hx.transpose(), wf) + bf)
-    i = sigmoid(np.matmul(hx.transpose(), wi) + bi)
-    c = np.tanh(np.matmul(hx.transpose(), wc) + bc)
-    o = sigmoid(np.matmul(hx.transpose(), wo) + bo)
+    f = np.matmul(hx.transpose(), wf) + bf
+    f = sigmoid(f)
+    i = np.matmul(hx.transpose(), wi) + bi
+    i = sigmoid(i)
+    c = np.matmul(hx.transpose(), wc) + bc
+    c = np.tanh(c)
+    o = np.matmul(hx.transpose(), wo) + bo
+    o = sigmoid(o)
 
     ct = ci * f + i * c
 
     ht = o * np.tanh(ct)
     return ct, ht
 
+def lstm_cell_test(hx, ci, wi, wc, wf, wo, bi, bc, bf, bo):
+    f = np.matmul(hx.transpose(), wf) + bf
+    f = sigmoid(f)
+    i = np.matmul(hx.transpose(), wi) + bi
+    i = sigmoid(i)
+    c = np.matmul(hx.transpose(), wc) + bc
+    c = np.tanh(c)
+    o = np.matmul(hx.transpose(), wo) + bo
+    o = sigmoid(o)
+
+    #ct = ci * f + i * c
+    ct = f + i + c
+
+    #ht = o * np.tanh(ct)
+    ht = o + np.tanh(ct)
+    return ct, ht
 
 '''
 x: x1, x2, x3
@@ -70,7 +90,7 @@ def demo():
     c_i = np.array([0, 0])
     hx_in = np.array([0.06, 0.3])
 
-    c, h = lstm_cell(hx_in, c_i, W_i, W_c, W_f, W_o, 0.01, 0.05, 0.002, 0.001)
+    c, h = lstm_cell_test(hx_in, c_i, W_i, W_c, W_f, W_o, 0.01, 0.05, 0.002, 0.001)
     print('ht: {}, ct: {}'.format(h, c))
 
 

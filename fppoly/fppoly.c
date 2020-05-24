@@ -381,28 +381,17 @@ void ffn_handle_first_layer(elina_manager_t* man, elina_abstract0_t * abs, doubl
 }
 
 #if HAS_RNN
+void ffn_handle_first_tanh_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim, size_t size, size_t num_pixels, size_t *predecessors){
+    ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, num_pixels, predecessors, TANH, true, MATMUL_RNN);
+}
+
+
 void ffn_handle_first_relu_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim, size_t size, size_t num_pixels, size_t *predecessors){
-#if 0
-    double weights_l1[2][8] = {
-            {0.1, -0.1, 0, 0, 0, 0, 1.0, 1.0},
-            {-0.1, 0.1, 0, 0, 0, 0, 1.0, -1.0}
-    };
-
-    double bias_l1[2] = {0, 0};
-
-    size_t expr_dim_l1[2][8] = {{0, 1, 2, 3, 4, 5, 6, 7}, {0, 1, 2, 3, 4, 5, 6, 7}};
-    size_t * expr_dim_l1_ptr =  &(expr_dim_l1[0]);
-    double * weights_l1_ptr[2];
-
-    for (int i = 0; i < 2; i++) {
-        weights_l1_ptr[i] = &(weights_l1[i]);
-    }
-    size_t predecessor[1] = {-1};
-
-    //ffn_handle_first_layer_(man, abs, weights_l1_ptr, bias_l1, expr_dim_l1_ptr, 2, 8, predecessor, RELU, true, MATMUL_RNN);
-#endif
     ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, num_pixels, predecessors, RELU, true, MATMUL_RNN);
+}
 
+void ffn_handle_first_sigmoid_layer_(elina_manager_t* man, elina_abstract0_t * abs, double **weights, double *bias, size_t * expr_dim, size_t size, size_t num_pixels, size_t *predecessors){
+    ffn_handle_first_layer_(man, abs, weights, bias, expr_dim, size, num_pixels, predecessors, SIGMOID, true, MATMUL_RNN);
 }
 #endif
 
@@ -544,8 +533,15 @@ void ffn_handle_intermediate_affine_layer(elina_manager_t* man, elina_abstract0_
 }
 
 #if HAS_RNN
+void ffn_handle_intermediate_tanh_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic){
+    ffn_handle_intermediate_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, TANH, true, use_area_heuristic, MATMUL_RNN);
+}
 void ffn_handle_intermediate_relu_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic){
     ffn_handle_intermediate_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, RELU, true, use_area_heuristic, MATMUL_RNN);
+}
+
+void ffn_handle_intermediate_sigmoid_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic){
+    ffn_handle_intermediate_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, SIGMOID, true, use_area_heuristic, MATMUL_RNN);
 }
 #endif
 void ffn_handle_intermediate_relu_layer(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias,  size_t num_out_neurons, size_t num_in_neurons, size_t *predecessors, bool use_area_heuristic){
@@ -788,8 +784,14 @@ void ffn_handle_last_layer(elina_manager_t* man, elina_abstract0_t* element, dou
 }
 
 #if HAS_RNN
+void ffn_handle_last_tanh_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t * predecessors, bool has_tanh, bool use_area_heuristic){
+    ffn_handle_last_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, has_tanh, TANH, true, use_area_heuristic);
+}
 void ffn_handle_last_relu_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t * predecessors, bool has_relu, bool use_area_heuristic){
     ffn_handle_last_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, has_relu, RELU, true, use_area_heuristic);
+}
+void ffn_handle_last_sigmoid_layer_(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias, size_t * expr_dim, size_t num_out_neurons, size_t num_in_neurons, size_t * predecessors, bool has_sigmoid, bool use_area_heuristic){
+    ffn_handle_last_layer_(man, element, weights, bias, expr_dim, num_out_neurons, num_in_neurons, predecessors, has_sigmoid, SIGMOID, true, use_area_heuristic);
 }
 #endif
 void ffn_handle_last_relu_layer(elina_manager_t* man, elina_abstract0_t* element, double **weights, double * bias,  size_t num_out_neurons, size_t num_in_neurons, size_t * predecessors, bool has_relu, bool use_area_heuristic){

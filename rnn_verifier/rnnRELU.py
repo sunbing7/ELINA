@@ -24,11 +24,11 @@ output_size = 10
 hidden_size = 64
 step_size = 112
 
-in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnRELU_input.pyt"
-net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnRELU_generated.pyt"
+in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnntanh_7_64.txt"
+net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnntanh_generated.pyt"
 test_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/mnist_test.csv"
 
-coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_0.0005.csv"
+coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_tanh_0.0005.csv"
 '''
 input_pixel = 9
 output_size = 3
@@ -53,7 +53,7 @@ W_ip, W_hh, W_op, bias_hh, bias_op, timestep, is_vanilarnn, mean, std = read_inp
 step_size = int(input_pixel / timestep)
 dimension = input_pixel + hidden_size
 
-convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, step_size, hidden_size, output_size, net_file, mean, std, "ReLU")
+convert_net_file(W_ip, W_hh, W_op, bias_hh, bias_op, timestep, step_size, hidden_size, output_size, net_file, mean, std, "Tanh")
 
 
 weight_matrix, weight_out, bias, bias_out = read_tensorflow_net(net_file, input_pixel, True)

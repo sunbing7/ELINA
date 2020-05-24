@@ -14,16 +14,6 @@ expr_t * lexpr_replace_maxpool_or_lstm_bounds_(fppoly_internal_t * pr, expr_t * 
     }
     else{
         k = expr->dim[0];
-#if 0
-        //check before everything
-
-        for (int idx = 0; idx < out_num_neurons; idx++) {
-            for (int dim_idx = 0; dim_idx < neurons[idx]->uexpr->size; dim_idx++ ) {
-                if (neurons[idx]->uexpr->dim[dim_idx] != dim_idx)
-                    printf("Wrong value!");
-            }
-        }
-#endif
     }
 
     neuron_t *neuron_k = neurons[k];
@@ -1312,7 +1302,7 @@ void lstm_add_new_layer(elina_manager_t *man, elina_abstract0_t *abs, size_t h, 
     create_lstm_layer(man, abs, h, predecessors);
     return;
 }
-
+#define TEST_MUL_OP 0
 void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *abs, double **weights,  double *bias, size_t * dim, size_t d, size_t h, size_t * predecessors, bool use_area_heuristic) {
 
     fppoly_t *fp = fppoly_of_abstract0(abs);
@@ -1496,6 +1486,15 @@ void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *ab
         //printf("=======================\n");
 
         //printf("multiplying control by input:\n");
+#if TEST_MUL_OP   //sunbing test multipication: ct = ct + it
+        expr_t *tmp_l, *tmp_u;
+        add_expr(pr,c_t_lexpr,i_t_lexpr);
+        add_expr(pr,c_t_uexpr,i_t_uexpr);
+
+        // ct = ct + ft
+        add_expr(pr,c_t_lexpr,f_t_lexpr);
+        add_expr(pr,c_t_uexpr,f_t_uexpr);
+#else
         expr_t *tmp_l, *tmp_u;
         double width1 = (ub_i_t + lb_i_t);
         double width2 = (ub_c_t + lb_c_t);
@@ -1565,7 +1564,7 @@ void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *ab
             free_expr(tmp_l);
             free_expr(tmp_u);
         }
-
+#endif
         layer->c_t_inf[i] = get_lb_using_previous_layers(man, fp, c_t_lexpr, lstm_index,use_area_heuristic);
         layer->c_t_sup[i] = get_ub_using_previous_layers(man, fp, c_t_uexpr, lstm_index,use_area_heuristic);
 
@@ -1576,7 +1575,14 @@ void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *ab
 
         lb_c_t = apply_tanh_lexpr(pr,&c_t_lexpr, neuron);
         ub_c_t = apply_tanh_uexpr(pr,&c_t_uexpr, neuron);
+#if TEST_MUL_OP   //sunbing test multipication:
+        expr_t * h_t_lexpr, *h_t_uexpr;
+        h_t_lexpr = copy_expr(c_t_lexpr);
+        h_t_uexpr = copy_expr(c_t_uexpr);
 
+        add_expr(pr,h_t_lexpr,o_t_lexpr);
+        add_expr(pr,h_t_uexpr,o_t_uexpr);
+#else
         width1 = (ub_o_t + lb_o_t);
         width2 = (ub_c_t + lb_c_t);
 
@@ -1611,7 +1617,7 @@ void lstm_handle_intermediate_layer_(elina_manager_t *man, elina_abstract0_t *ab
             }
 #endif
         }
-
+#endif
         layer->h_t_inf[i] = get_lb_using_previous_layers(man, fp, h_t_lexpr, lstm_index,use_area_heuristic);
         layer->h_t_sup[i] = get_ub_using_previous_layers(man, fp, h_t_uexpr, lstm_index,use_area_heuristic);
 

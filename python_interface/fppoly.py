@@ -356,6 +356,44 @@ def ffn_handle_first_sigmoid_layer(man, element, weights, bias, size, num_pixels
     return
 
 
+def rnn_handle_first_sigmoid_layer(man, element, weights, bias, dim, size, num_pixels, predecessors):
+    """
+    handle the FFN first Sigmoid layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix.
+    bias : POINTER(c_double)
+        The bias vector
+    size: c_size_t
+	Number of neurons in the first layer
+    num_pixels:
+        Number of pixels in the input
+    predecessors:
+        the layers before the current layer
+    Returns
+    -------
+    res : ElinaAbstract0Ptr
+        Pointer to the new abstract object.
+
+    """
+
+    try:
+        ffn_handle_first_sigmoid_layer_c = fppoly_api.ffn_handle_first_sigmoid_layer_
+        ffn_handle_first_sigmoid_layer_c.restype = None
+        ffn_handle_first_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                     ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_sigmoid_layer_c(man, element, weights, bias, dim, size, num_pixels, predecessors)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_first_sigmoid_layer" from "libfppoly.so"')
+        print(inst)
+
+    return
+
+
 def ffn_handle_first_sigmoid_layer_no_alloc(man, element, weights, bias, size, num_pixels, predecessors):
     """
         handle the FFN first Sigmoid layer
@@ -428,6 +466,45 @@ def ffn_handle_first_tanh_layer(man, element, weights, bias, size, num_pixels, p
         ffn_handle_first_tanh_layer_c(man, element, weights, bias, size, num_pixels, predecessors)
     except Exception as inst:
         print('Problem with loading/calling "ffn_handle_first_tanh_layer" from "libfppoly.so"')
+        print(inst)
+
+    return
+
+#rnn
+
+def rnn_handle_first_tanh_layer(man, element, weights, bias, dim, size, num_pixels, predecessors):
+    """
+    handle the first FFN Tanh layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    weights : POINTER(POINTER(c_double))
+        The weight matrix
+    bias : POINTER(c_double)
+        The bias vector
+    size: c_size_t
+	Number of neurons in the first layer
+    num_pixels:
+        Number of pixels in the input
+    predecessors:
+        the layers before the current layer
+    Returns
+    -------
+    res : ElinaAbstract0Ptr
+        Pointer to the new abstract object.
+
+    """
+
+    try:
+        ffn_handle_first_tanh_layer_c = fppoly_api.ffn_handle_first_tanh_layer_
+        ffn_handle_first_tanh_layer_c.restype = None
+        ffn_handle_first_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                  ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t)]
+        ffn_handle_first_tanh_layer_c(man, element, weights, bias, dim, size, num_pixels, predecessors)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_first_tanh_layer" from "libfppoly.so"')
         print(inst)
 
     return
@@ -946,6 +1023,49 @@ def ffn_handle_intermediate_sigmoid_layer(man, element, weights, bias, num_out_n
         print(inst)
 
 
+def rnn_handle_intermediate_sigmoid_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                          use_area_heuristic):
+    """
+    handle the intermediate FFN Sigmoid layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix.
+    bias: POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        number of output neurons
+    num_in_neurons: c_size_t
+	number of input neurons
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_intermediate_sigmoid_layer_c = fppoly_api.ffn_handle_intermediate_sigmoid_layer_
+        ffn_handle_intermediate_sigmoid_layer_c.restype = None
+        ffn_handle_intermediate_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                            ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t,
+                                                            POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_sigmoid_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons,
+                                                predecessors, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_intermediate_sigmoid_layer" from "libfppoly.so"')
+        print(inst)
+    return
+
+
 def ffn_handle_intermediate_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons,
                                                    predecessors, use_area_heuristic):
     """
@@ -1029,6 +1149,47 @@ def ffn_handle_intermediate_tanh_layer(man, element, weights, bias, num_out_neur
         print('Problem with loading/calling "ffn_handle_intermediate_tanh_layer" from "libfppoly.so"')
         print(inst)
 
+def rnn_handle_intermediate_tanh_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                       use_area_heuristic):
+    """
+    handle the intermediate FFN Tanh layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix.
+    bias: POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        number of output neurons
+    num_in_neurons: c_size_t
+	number of input neurons
+    predecessors:
+        the layers before the current layer
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_intermediate_tanh_layer_c = fppoly_api.ffn_handle_intermediate_tanh_layer_
+        ffn_handle_intermediate_tanh_layer_c.restype = None
+        ffn_handle_intermediate_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                         ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t,
+                                                         POINTER(c_size_t), c_bool]
+        ffn_handle_intermediate_tanh_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                             use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_intermediate_tanh_layer" from "libfppoly.so"')
+        print(inst)
+    return
 
 def ffn_handle_intermediate_sub_layer(man, element, bias, is_minuend, num_in_neurons, predecessors, use_area_heuristic):
     """
@@ -1534,6 +1695,50 @@ def ffn_handle_last_sigmoid_layer(man, element, weights, bias, num_out_neurons, 
         print(inst)
 
 
+def rnn_handle_last_sigmoid_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                  has_sigmoid, use_area_heuristic):
+    """
+    handle the last FFN Sigmoid layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0 abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix
+    bias : POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        The number of output neurons
+    num_in_neurons: c_size_t
+	The number of input_neurons
+    predecessors:
+        the layers before the current layer
+    has_sigmoid: c_bool
+        if the last layer has a Sigmoid activation
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_last_sigmoid_layer_c = fppoly_api.ffn_handle_last_sigmoid_layer_
+        ffn_handle_last_sigmoid_layer_c.restype = None
+        ffn_handle_last_sigmoid_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                    ndpointer(ctypes.c_double), POINTER(c_size_t), c_size_t, c_size_t, POINTER(c_size_t),
+                                                    c_bool, c_bool]
+        ffn_handle_last_sigmoid_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                        has_sigmoid, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "rnn_handle_last_sigmoid_layer" from "libfppoly.so"')
+        print(inst)
+    return
+
 def ffn_handle_last_sigmoid_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
                                            has_sigmoid, use_area_heuristic):
     """
@@ -1621,6 +1826,49 @@ def ffn_handle_last_tanh_layer(man, element, weights, bias, num_out_neurons, num
         print('Problem with loading/calling "ffn_handle_last_tanh_layer" from "libfppoly.so"')
         print(inst)
 
+def rnn_handle_last_tanh_layer(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors, has_tanh,
+                               use_area_heuristic):
+    """
+    handle the last FFN Tanh layer
+
+    Parameters
+    ----------
+    man : ElinaManagerPtr
+        Pointer to the ElinaManager.
+    element : ElinaAbstract0Ptr
+        Pointer to the ElinaAbstract0 abstract element
+    weights: POINTER(POINTER(c_double))
+        The weight matrix
+    bias : POINTER(c_size_t)
+        The bias vector
+    num_out_neurons: c_size_t
+        The number of output neurons
+    num_in_neurons: c_size_t
+	The number of input_neurons
+    predecessors:
+        the layers before the current layer
+    has_tanh: c_bool
+        if the last layer has a Tanh activation
+    use_area_heuristic: c_bool
+        whether to use area heuristic
+    Returns
+    -------
+    None
+
+    """
+
+    try:
+        ffn_handle_last_tanh_layer_c = fppoly_api.ffn_handle_last_tanh_layer_
+        ffn_handle_last_tanh_layer_c.restype = None
+        ffn_handle_last_tanh_layer_c.argtypes = [ElinaManagerPtr, ElinaAbstract0Ptr, _doublepp,
+                                                 ndpointer(ctypes.c_double), POINTER(c_size_t),c_size_t, c_size_t, POINTER(c_size_t),
+                                                 c_bool, c_bool]
+        ffn_handle_last_tanh_layer_c(man, element, weights, bias, dim, num_out_neurons, num_in_neurons, predecessors,
+                                     has_tanh, use_area_heuristic)
+    except Exception as inst:
+        print('Problem with loading/calling "ffn_handle_last_tanh_layer" from "libfppoly.so"')
+        print(inst)
+    return
 
 def ffn_handle_last_tanh_layer_no_alloc(man, element, weights, bias, num_out_neurons, num_in_neurons, predecessors,
                                         has_tanh, use_area_heuristic):

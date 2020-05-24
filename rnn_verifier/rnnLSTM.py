@@ -24,7 +24,7 @@ lstm_test_on = True
 export_coef = True
 
 # input layer
-epsilon = 0.001
+epsilon = 0.1
 
 input_pixel = 784
 output_size = 10
@@ -33,10 +33,10 @@ hidden_gate = hidden_size * 4
 step_size = 112
 
 in_file =  "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/lstm_net_7_16.txt"
-net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnLSTM_generated_7_16.pyt"
+net_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/net/rnnLSTM_generate_demo.pyt"
 test_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/mnist_test.csv"
 
-coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_lstm_{}_7_16.csv".format(epsilon)
+coeff_out_file = "/Users/bing.sun/workspace/elina/ELINA-master-python/rnn_verifier/data/test/coeff_out_lstm_{}_demo.csv".format(epsilon)
 '''
 input_pixel = 9
 output_size = 3
@@ -199,6 +199,8 @@ total_test_image = 0
 total_verified_image = 0
 
 for i, test in enumerate(tests):
+    #if i < 59:
+    #    continue
     total_image = total_image + 1
     real_class = -1
     image = np.float64(test[1:len(test)]) / np.float64(255)
@@ -210,8 +212,10 @@ for i, test in enumerate(tests):
 
     #test
     #if lstm_test_on == True:
-     #   image = np.array([1.0] * dimension)
-     #   full_img = np.array([1.0] * input_pixel)
+        #image = np.array([1.0] * dimension)
+        #full_img = np.array([1.0] * input_pixel)
+     #   image = np.array([1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, 1.0])
+     #   full_img = np.array([1.0, 1.0, 1.0, 1.0, -1.0, -1.0])
 
 
     inf = np.copy(image)
@@ -255,7 +259,7 @@ for i, test in enumerate(tests):
                 ci1 = np.array(c1)
             c1, h1 = lstm_layer(hx1, ci1, tester_w, tester_b, hidden_size)
 
-            #print('ct: {}\n'.format(c1))
+            print('ct: {}\n'.format(c1))
             print('{} ht: {}\n'.format(i, h1))
             tester_wo = W_op
             tester_bo = bias_out
@@ -269,9 +273,9 @@ for i, test in enumerate(tests):
     lstm_handle_first_layer_(man, element, weights_ip_ptr, bias_ip, dim, dimension, pre_in)
 
     for k in range (0, timestep):
-        print(k)
+        #print(k)
         lstm_handle_intermediate_layer_(man, element, weights_ptr[k], bias_tmp, dim, dimension, hidden_size, predecessor[k], True)
-        elina_abstract0_fprint(cstdout, man, element, None)
+        #elina_abstract0_fprint(cstdout, man, element, None)
 
     lstm_handle_last_layer_(man, element, weights_op, bias_op, dim, hidden_size, output_size, pre_op, True)
     elina_abstract0_fprint(cstdout, man, element, None)
@@ -291,7 +295,7 @@ for i, test in enumerate(tests):
     # verify property
     lstm_handle_last_layer_(man, element, weights_l_ptr, bias_l, dim, dimension, compare_size, pre_l, True)
 
-    #elina_abstract0_fprint(cstdout, man, element, None)
+    elina_abstract0_fprint(cstdout, man, element, None)
 
 
     cmp_idx = 0
@@ -354,7 +358,7 @@ for i, test in enumerate(tests):
     # verify property
     lstm_handle_last_layer_(man, element, weights_l_ptr, bias_l, dim, dimension, compare_size, pre_l, True)
 
-    elina_abstract0_fprint(cstdout, man, element, None)
+    #elina_abstract0_fprint(cstdout, man, element, None)
     cmp_idx = 0
     for out_i in range(0, output_size):
         flag = True

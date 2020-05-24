@@ -21,14 +21,22 @@ void update_state_using_predecessor_layer(fppoly_internal_t *pr,fppoly_t *fp, ex
 #endif
 		}
 		else if(fp->layers[k]->activation==SIGMOID){
-		                
-		       lexpr = lexpr_replace_sigmoid_bounds(pr,lexpr,aux_neurons);
-		               
-		       uexpr = uexpr_replace_sigmoid_bounds(pr,uexpr,aux_neurons);
+#if HAS_RNN
+            lexpr = lexpr_replace_sigmoid_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
+            uexpr = uexpr_replace_sigmoid_bounds_(pr,uexpr,aux_neurons, fp->layers[k]->dims);
+#else
+           lexpr = lexpr_replace_sigmoid_bounds(pr,lexpr,aux_neurons);
+           uexpr = uexpr_replace_sigmoid_bounds(pr,uexpr,aux_neurons);
+#endif
 		}
 		else if(fp->layers[k]->activation==TANH){
-		       lexpr = lexpr_replace_tanh_bounds(pr,lexpr,aux_neurons);
-		       uexpr = uexpr_replace_tanh_bounds(pr,uexpr,aux_neurons);
+#if HAS_RNN
+            lexpr = lexpr_replace_tanh_bounds_(pr,lexpr,aux_neurons, fp->layers[k]->dims);
+            uexpr = uexpr_replace_tanh_bounds_(pr,uexpr,aux_neurons, fp->layers[k]->dims);
+#else
+		    lexpr = lexpr_replace_tanh_bounds(pr,lexpr,aux_neurons);
+		    uexpr = uexpr_replace_tanh_bounds(pr,uexpr,aux_neurons);
+#endif
 		}
 		else if(fp->layers[k]->activation==PARABOLA){
 			lexpr = lexpr_replace_parabola_bounds(pr,lexpr,aux_neurons);

@@ -25,7 +25,7 @@ void compute_derivative(double *slope_inf, double *slope_sup, double s_curve_l, 
 
 }
 
-void compute_slope_and_intercept_s_curve_lexpr(fppoly_internal_t * pr, double * slope_inf, double *slope_sup, 
+void compute_slope_and_intercept_s_curve_lexpr(fppoly_internal_t * pr, double * slope_inf, double *slope_sup,
 						double *intercept_inf, double *intercept_sup, double inf_coeff, 
 						double sup_coeff, double lb, double ub, bool is_sigmoid, bool *boxify){
 	
@@ -57,7 +57,7 @@ void compute_slope_and_intercept_s_curve_lexpr(fppoly_internal_t * pr, double * 
 		den_sup_l = e_sup_l;
 		den_sup_u = e_sup_u;
 	}
-
+    //if((fabs(-lb - ub) < 0.1E-14) || (fabs(-f_inf_l - f_sup_u) < 0.1E-14)){
 	if((-lb==ub)|| (-f_inf_l==f_sup_u)){
 		*slope_inf = 0.0;
 		*slope_sup = 0.0;	
@@ -239,7 +239,7 @@ void compute_slope_and_intercept_s_curve_uexpr(fppoly_internal_t * pr, double * 
             den_sup_l = e_sup_l;
             den_sup_u = e_sup_u;
         }
-        
+        //if((fabs(-lb - ub) < 0.1E-14) || (fabs(-f_inf_l - f_sup_u) < 0.1E-14)){
         if((-lb==ub) || (-f_inf_l==f_sup_u)){
 	    *slope_inf = 0.0;
 	    *slope_sup = 0.0;
@@ -435,8 +435,10 @@ expr_t * lexpr_replace_s_curve_bounds_(fppoly_internal_t * pr, expr_t * expr, ne
 
         if (expr->type == SPARSE) {
             if ((k + 1) > aux_neuron_len) {
-                res->inf_coeff[i] = expr->inf_coeff[i];
-                res->sup_coeff[i] = expr->sup_coeff[i];
+                if (res->size > k) {
+                    res->inf_coeff[i] = expr->inf_coeff[i];
+                    res->sup_coeff[i] = expr->sup_coeff[i];
+                }
                 continue;
             }
         }
@@ -496,8 +498,10 @@ expr_t * uexpr_replace_s_curve_bounds_(fppoly_internal_t *pr, expr_t * expr, neu
 
         if (expr->type == SPARSE) {
             if ((k + 1) > aux_neuron_len) {
-                res->inf_coeff[i] = expr->inf_coeff[i];
-                res->sup_coeff[i] = expr->sup_coeff[i];
+                if (res->size > k) {
+                    res->inf_coeff[i] = expr->inf_coeff[i];
+                    res->sup_coeff[i] = expr->sup_coeff[i];
+                }
                 continue;
             }
         }
@@ -640,7 +644,7 @@ expr_t * uexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neu
 }
 
 expr_t * uexpr_replace_tanh_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
-    return uexpr_replace_s_curve_bounds_(pr, expr, neurons, false, aux_neuron_len);
+    return uexpr_replace_s_curve_bounds_(pr, expr, neurons, aux_neuron_len, false);
 }
 
 expr_t * lexpr_replace_sigmoid_bounds_(fppoly_internal_t *pr, expr_t * expr, neuron_t ** neurons, size_t aux_neuron_len){
@@ -703,7 +707,7 @@ double apply_s_curve_lexpr(fppoly_internal_t *pr, expr_t **lexpr_p, neuron_t * n
 			lexpr->inf_coeff[i] = 0.0;
 			lexpr->sup_coeff[i] = 0.0;
 		}
-		lexpr->inf_cst = /*lexpr->inf_cst + */intercept_inf;
+		lexpr->inf_cst = /*lexpr->inf_cst + */intercept_inf;    //sunbing
 		lexpr->sup_cst = /*lexpr->sup_cst + */intercept_sup;
 	}
 	else{
@@ -751,7 +755,7 @@ double apply_s_curve_uexpr(fppoly_internal_t *pr, expr_t **uexpr_p, neuron_t * n
 			uexpr->inf_coeff[i] = 0.0;
 		    	uexpr->sup_coeff[i] = 0.0;
 		}
-		uexpr->inf_cst = /*uexpr->inf_cst + */intercept_inf;
+		uexpr->inf_cst = /*uexpr->inf_cst + */intercept_inf;    //sunbing
 		uexpr->sup_cst = /*uexpr->sup_cst + */intercept_sup;
 	}
 	else{
